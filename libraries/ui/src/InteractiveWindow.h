@@ -121,6 +121,13 @@ public slots:
      */
     Q_INVOKABLE void raise();
 
+    /**jsdoc
+     * @function Application state changed
+     */
+    Q_INVOKABLE void mainWindowMinimized(bool);
+
+    Q_INVOKABLE void focusChanged(QWidget*, QWidget*);
+
 signals:
 
     /**jsdoc

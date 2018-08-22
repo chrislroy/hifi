@@ -38,7 +38,6 @@ Windows.Window {
 
     // custom visibility flag for interactiveWindow to proxy virtualWindow.shown / nativeWindow.visible
     property var interactiveWindowVisible: true;
-
     property point interactiveWindowPosition;
 
     property size interactiveWindowSize;
@@ -51,6 +50,12 @@ Windows.Window {
     property int presentationMode: 0;
 
     property var initialized: false;
+
+    // for app minimized
+    property var applicationMinimized: false;
+    property var windowMinimized: false;
+    property var appHasFocus: true;
+
     onSourceChanged: {
         if (dynamicContent) {
             dynamicContent.destroy();
@@ -128,6 +133,8 @@ Windows.Window {
         width = interactiveWindowSize.width;
         height = interactiveWindowSize.height;
 
+        console.log("**** CROY **** interactiveWindow.qml - calling Qt.createQmlObject.");
+
         nativeWindow = Qt.createQmlObject('
             import QtQuick 2.3;
             import QtQuick.Window 2.3;
@@ -139,6 +146,7 @@ Windows.Window {
                     anchors.fill: parent
                 }
             }', root, 'InteractiveWindow.qml->nativeWindow');
+
         nativeWindow.title = root.title;
         var nativeWindowFlags = Qt.Window |
             Qt.WindowTitleHint |
@@ -149,6 +157,7 @@ Windows.Window {
         if ((flags & Desktop.ALWAYS_ON_TOP) === Desktop.ALWAYS_ON_TOP) {
             nativeWindowFlags |= Qt.WindowStaysOnTopHint;
         }
+
         nativeWindow.flags = nativeWindowFlags;
 
         nativeWindow.x = interactiveWindowPosition.x;
@@ -179,6 +188,20 @@ Windows.Window {
             }
         });
 
+        console.log('**** CROY **** interactveWindow.qml - creating window');
+
+        // parent of native window state changed
+        
+        nativeWindow.windowStateChanged.connect(function(state) {
+            // Qt::WindowNoState - 0 - normal
+            // Qt::WindowMinimized - 1 - minimized
+            if (!applicationMinimized) {
+                windowMinimized = state;
+                console.log('**** CROY **** interactveWindow.qml - interactveWindow state changed', windowMinimized);
+            }
+        })
+        
+
         nativeWindow.closing.connect(function(closeEvent) {
             closeEvent.accepted = false;
             windowClosed();
@@ -208,6 +231,7 @@ Windows.Window {
     }
 
     function raiseWindow() {
+        console.log("**** CROY **** - raisonWindow")
         if (presentationMode === Desktop.PresentationMode.VIRTUAL) {
             raise();
         } else if (presentationMode === Desktop.PresentationMode.NATIVE && nativeWindow) {
@@ -224,7 +248,28 @@ Windows.Window {
         }
     }
 
+    onAppHasFocusChanged: {
+        console.log("**** CROY **** app focus has changed!");
+        nativeWindow.flags = (nativeWindow.flags &= ~Qt.WindowStaysOnTopHint);
+    }
+
+    onApplicationMinimizedChanged: {
+        console.log("onApplicationMinimizedChanged - applicationMinimized:", applicationMinimized);
+
+        if (applicationMinimized) {
+            nativeWindow.showMinimized();
+        }
+        else if (!windowMinimized) {
+            if (presentationMode === Desktop.PresentationMode.VIRTUAL) {
+                shown = interactiveWindowVisible;
+            } else if (presentationMode === Desktop.PresentationMode.NATIVE && nativeWindow && interactiveWindowVisible) {
+                nativeWindow.showNormal();
+            }
+        }
+    }
+
     onInteractiveWindowVisibleChanged: {
+        console.log("onInteractiveWindowVisibleChanged - interactiveWindowVisible:", interactiveWindowVisible);
         if (presentationMode === Desktop.PresentationMode.VIRTUAL) {
             shown = interactiveWindowVisible;
         } else if (presentationMode === Desktop.PresentationMode.NATIVE && nativeWindow) {
@@ -274,6 +319,7 @@ Windows.Window {
 
     onWindowClosed: {
         // set invisible on close, to make it not re-appear unintended after switching PresentationMode
+        console.log("**** CROY **** windowClosed")
         interactiveWindowVisible = false;
 
         if ((flags & Desktop.CLOSE_BUTTON_HIDES) !== Desktop.CLOSE_BUTTON_HIDES) {

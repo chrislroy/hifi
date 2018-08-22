@@ -13,7 +13,10 @@
 
 #include <QtQml/QQmlContext>
 #include <QtCore/QThread>
-
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QApplication>
+#include <QVariant>
+#include <QDebug>
 #include <DependencyManager.h>
 #include <RegisteredMetaTypes.h>
 
@@ -31,10 +34,17 @@ static const char* const SIZE_PROPERTY = "size";
 static const char* const INTERACTIVE_WINDOW_SIZE_PROPERTY = "interactiveWindowSize";
 static const char* const VISIBLE_PROPERTY = "visible";
 static const char* const INTERACTIVE_WINDOW_VISIBLE_PROPERTY = "interactiveWindowVisible";
+static const char* const APPLICATION_MINIMIZED = "applicationMinimized";
+static const char* const APPLICATION_HAD_FOCUS = "focusChanged";
 static const char* const EVENT_BRIDGE_PROPERTY = "eventBridge";
 static const char* const PRESENTATION_MODE_PROPERTY = "presentationMode";
 
-static const QStringList KNOWN_SCHEMES = QStringList() << "http" << "https" << "file" << "about" << "atp" << "qrc";
+static const QStringList KNOWN_SCHEMES = QStringList() << "http"
+                                                       << "https"
+                                                       << "file"
+                                                       << "about"
+                                                       << "atp"
+                                                       << "qrc";
 
 void registerInteractiveWindowMetaType(QScriptEngine* engine) {
     qScriptRegisterMetaType(engine, interactiveWindowPointerToScriptValue, interactiveWindowPointerFromScriptValue);
@@ -50,13 +60,33 @@ void interactiveWindowPointerFromScriptValue(const QScriptValue& object, Interac
     }
 }
 
+QMainWindow* getMainWindow() {
+    foreach (QWidget* widget, QApplication::topLevelWidgets()) {
+        QMainWindow* mainWindow = qobject_cast<QMainWindow*>(widget);
+        if (mainWindow) {
+            return mainWindow;
+        }
+    }
+    return nullptr;
+}
+
 InteractiveWindow::InteractiveWindow(const QString& sourceUrl, const QVariantMap& properties) {
     auto offscreenUi = DependencyManager::get<OffscreenUi>();
 
     // Build the event bridge and wrapper on the main thread
+
     offscreenUi->loadInNewContext(CONTENT_WINDOW_QML, [&](QQmlContext* context, QObject* object) {
+        qDebug("**** CROY **** new InteractiveWindow (%s)", qPrintable(object->objectName()));
+        QMainWindow* mw = getMainWindow();
         _qmlWindow = object;
+        if (mw) {
+            connect(mw, SIGNAL(windowMinimizedChanged(bool)), this, SLOT(mainWindowMinimized(bool)), Qt::QueuedConnection);
+
+            connect(qApp, SIGNAL(focusChanged(QWidget *, QWidget *)), this,
+                    SLOT(focusChanged(QWidget *, QWidget *)), Qt::QueuedConnection);
+        }
         context->setContextProperty(EVENT_BRIDGE_PROPERTY, this);
+
         if (properties.contains(FLAGS_PROPERTY)) {
             object->setProperty(FLAGS_PROPERTY, properties[FLAGS_PROPERTY].toUInt());
         }
@@ -152,6 +182,23 @@ void InteractiveWindow::raise() {
 
     if (_qmlWindow) {
         QMetaObject::invokeMethod(_qmlWindow, "raiseWindow", Qt::DirectConnection);
+    }
+}
+
+void InteractiveWindow::mainWindowMinimized(bool minimized) {
+    qDebug(QString("**** CROY **** MainWindow minimized changed: %1").arg(minimized).toLatin1());
+    _qmlWindow->setProperty(APPLICATION_MINIMIZED, minimized);
+}
+
+void InteractiveWindow::focusChanged(QWidget* old, QWidget* now)
+{
+    qDebug("**** CROY **** focusChanged");
+
+    QWidget*focusWidget = QApplication::focusWidget();
+    if (!focusWidget) {
+        _qmlWindow->setProperty(APPLICATION_HAD_FOCUS, false);
+    } else {
+        _qmlWindow->setProperty(APPLICATION_HAD_FOCUS, true);
     }
 }
 
@@ -268,8 +315,7 @@ void InteractiveWindow::setTitle(const QString& title) {
 int InteractiveWindow::getPresentationMode() const {
     if (QThread::currentThread() != thread()) {
         int result;
-        BLOCKING_INVOKE_METHOD(const_cast<InteractiveWindow*>(this), "getPresentationMode",
-            Q_RETURN_ARG(int, result));
+        BLOCKING_INVOKE_METHOD(const_cast<InteractiveWindow*>(this), "getPresentationMode", Q_RETURN_ARG(int, result));
         return result;
     }
 
