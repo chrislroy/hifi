@@ -126,7 +126,7 @@ public slots:
      */
     Q_INVOKABLE void mainWindowMinimized(bool);
 
-    Q_INVOKABLE void focusChanged(QWidget*, QWidget*);
+    Q_INVOKABLE void appFocusChanged(QWidget*, QWidget*);
 
 signals:
 

@@ -133,7 +133,7 @@ Windows.Window {
         width = interactiveWindowSize.width;
         height = interactiveWindowSize.height;
 
-        console.log("**** CROY **** interactiveWindow.qml - calling Qt.createQmlObject.");
+        // console.log("**** CROY **** interactiveWindow.qml - calling Qt.createQmlObject.");
 
         nativeWindow = Qt.createQmlObject('
             import QtQuick 2.3;
@@ -188,7 +188,7 @@ Windows.Window {
             }
         });
 
-        console.log('**** CROY **** interactveWindow.qml - creating window');
+        // console.log('**** CROY **** interactveWindow.qml - creating window');
 
         // parent of native window state changed
         
@@ -197,7 +197,7 @@ Windows.Window {
             // Qt::WindowMinimized - 1 - minimized
             if (!applicationMinimized) {
                 windowMinimized = state;
-                console.log('**** CROY **** interactveWindow.qml - interactveWindow state changed', windowMinimized);
+                // console.log('**** CROY **** interactveWindow.qml - interactveWindow state changed', windowMinimized);
             }
         })
         
@@ -231,7 +231,7 @@ Windows.Window {
     }
 
     function raiseWindow() {
-        console.log("**** CROY **** - raisonWindow")
+        // console.log("**** CROY **** - raisonWindow")
         if (presentationMode === Desktop.PresentationMode.VIRTUAL) {
             raise();
         } else if (presentationMode === Desktop.PresentationMode.NATIVE && nativeWindow) {
@@ -249,12 +249,19 @@ Windows.Window {
     }
 
     onAppHasFocusChanged: {
-        console.log("**** CROY **** app focus has changed!");
-        nativeWindow.flags = (nativeWindow.flags &= ~Qt.WindowStaysOnTopHint);
+        // console.log("**** CROY **** - onAppHasFocusChanged - appHasFocus:", appHasFocus);
+        if (appHasFocus) {
+            nativeWindow.flags = (nativeWindow.flags |= Qt.WindowStaysOnTopHint);
+        }
+        else {
+            nativeWindow.flags = (nativeWindow.flags &= ~Qt.WindowStaysOnTopHint);
+        }
+        //if (interactiveWindowVisible)
+        //    nativeWindow.showNormal();
     }
 
     onApplicationMinimizedChanged: {
-        console.log("onApplicationMinimizedChanged - applicationMinimized:", applicationMinimized);
+        // console.log("**** CROY **** - onApplicationMinimizedChanged - applicationMinimized:", applicationMinimized);
 
         if (applicationMinimized) {
             nativeWindow.showMinimized();
@@ -319,7 +326,7 @@ Windows.Window {
 
     onWindowClosed: {
         // set invisible on close, to make it not re-appear unintended after switching PresentationMode
-        console.log("**** CROY **** windowClosed")
+        // console.log("**** CROY **** windowClosed")
         interactiveWindowVisible = false;
 
         if ((flags & Desktop.CLOSE_BUTTON_HIDES) !== Desktop.CLOSE_BUTTON_HIDES) {

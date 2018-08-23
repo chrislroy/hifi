@@ -16,6 +16,8 @@
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QApplication>
 #include <QVariant>
+#include <QWindow>
+#include <QBoxLayout>
 #include <QDebug>
 #include <DependencyManager.h>
 #include <RegisteredMetaTypes.h>
@@ -35,7 +37,7 @@ static const char* const INTERACTIVE_WINDOW_SIZE_PROPERTY = "interactiveWindowSi
 static const char* const VISIBLE_PROPERTY = "visible";
 static const char* const INTERACTIVE_WINDOW_VISIBLE_PROPERTY = "interactiveWindowVisible";
 static const char* const APPLICATION_MINIMIZED = "applicationMinimized";
-static const char* const APPLICATION_HAD_FOCUS = "focusChanged";
+static const char* const APPLICATION_HAD_FOCUS = "appHasFocus";
 static const char* const EVENT_BRIDGE_PROPERTY = "eventBridge";
 static const char* const PRESENTATION_MODE_PROPERTY = "presentationMode";
 
@@ -74,17 +76,17 @@ InteractiveWindow::InteractiveWindow(const QString& sourceUrl, const QVariantMap
     auto offscreenUi = DependencyManager::get<OffscreenUi>();
 
     // Build the event bridge and wrapper on the main thread
+    QMainWindow* mw = getMainWindow();
 
     offscreenUi->loadInNewContext(CONTENT_WINDOW_QML, [&](QQmlContext* context, QObject* object) {
-        qDebug("**** CROY **** new InteractiveWindow (%s)", qPrintable(object->objectName()));
-        QMainWindow* mw = getMainWindow();
-        _qmlWindow = object;
         if (mw) {
             connect(mw, SIGNAL(windowMinimizedChanged(bool)), this, SLOT(mainWindowMinimized(bool)), Qt::QueuedConnection);
 
-            connect(qApp, SIGNAL(focusChanged(QWidget *, QWidget *)), this,
-                    SLOT(focusChanged(QWidget *, QWidget *)), Qt::QueuedConnection);
+            connect(qApp, SIGNAL(focusChanged(QWidget*, QWidget*)), this, SLOT(appFocusChanged(QWidget*, QWidget*)),
+                    Qt::QueuedConnection);
         }
+        _qmlWindow = object;
+
         context->setContextProperty(EVENT_BRIDGE_PROPERTY, this);
 
         if (properties.contains(FLAGS_PROPERTY)) {
@@ -124,6 +126,26 @@ InteractiveWindow::InteractiveWindow(const QString& sourceUrl, const QVariantMap
         }
         object->setProperty(SOURCE_PROPERTY, sourceURL);
     });
+
+#if 0
+    auto var = _qmlWindow->property("nativeWindow");
+    auto obj = qvariant_cast<QObject*>(var);
+    auto win = qobject_cast<QWindow*>(obj);
+    QRect r = win->geometry();
+    qDebug() << qPrintable(QString("Rect %1 %2 %3 %4").arg(r.top()).arg(r.left()).arg(r.width()).arg(r.height()));
+
+    QWidget* w =
+        QWidget::createWindowContainer(win, mw, 
+            Qt::Window | 
+            Qt::WindowTitleHint | 
+            Qt::WindowSystemMenuHint | 
+            Qt::WindowCloseButtonHint |
+            Qt::WindowMaximizeButtonHint | 
+            Qt::WindowMinimizeButtonHint);
+
+    w->setGeometry(r);
+    w->show();
+#endif
 }
 
 InteractiveWindow::~InteractiveWindow() {
@@ -186,20 +208,14 @@ void InteractiveWindow::raise() {
 }
 
 void InteractiveWindow::mainWindowMinimized(bool minimized) {
-    qDebug(QString("**** CROY **** MainWindow minimized changed: %1").arg(minimized).toLatin1());
+    // qDebug(QString("**** CROY **** MainWindow minimized changed: %1").arg(minimized).toLatin1());
     _qmlWindow->setProperty(APPLICATION_MINIMIZED, minimized);
 }
 
-void InteractiveWindow::focusChanged(QWidget* old, QWidget* now)
-{
-    qDebug("**** CROY **** focusChanged");
-
-    QWidget*focusWidget = QApplication::focusWidget();
-    if (!focusWidget) {
-        _qmlWindow->setProperty(APPLICATION_HAD_FOCUS, false);
-    } else {
-        _qmlWindow->setProperty(APPLICATION_HAD_FOCUS, true);
-    }
+void InteractiveWindow::appFocusChanged(QWidget* old, QWidget* now) {
+    //auto qmlWidget = dynamic_cast<QWidget*>(_qmlWindow.data());
+    //qmlWidget->focusWidget() ||
+    _qmlWindow->setProperty(APPLICATION_HAD_FOCUS, QApplication::focusWidget() ? true : false);
 }
 
 void InteractiveWindow::qmlToScript(const QVariant& message) {
