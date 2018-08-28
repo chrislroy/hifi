@@ -121,6 +121,7 @@ void Stats::updateStats(bool force) {
     auto avatarManager = DependencyManager::get<AvatarManager>();
     // we need to take one avatar out so we don't include ourselves
     STAT_UPDATE(avatarCount, avatarManager->size() - 1);
+    STAT_UPDATE(physicsObjectCount, qApp->getNumCollisionObjects());
     STAT_UPDATE(updatedAvatarCount, avatarManager->getNumAvatarsUpdated());
     STAT_UPDATE(notUpdatedAvatarCount, avatarManager->getNumAvatarsNotUpdated());
     STAT_UPDATE(serverCount, (int)nodeList->size());
@@ -174,7 +175,7 @@ void Stats::updateStats(bool force) {
     int octreeServerCount = 0;
     int pingOctreeMax = 0;
     int totalEntityKbps = 0;
-    nodeList->eachNode([&](const SharedNodePointer& node) {
+    nodeList->eachNode([&totalPingOctree, &totalEntityKbps, &octreeServerCount, &pingOctreeMax](const SharedNodePointer& node) {
         // TODO: this should also support entities
         if (node->getType() == NodeType::EntityServer) {
             totalPingOctree += node->getPingMs();
@@ -219,7 +220,7 @@ void Stats::updateStats(bool force) {
         STAT_UPDATE_FLOAT(myAvatarSendRate, avatarManager->getMyAvatarSendRate(), 0.1f);
 
         SharedNodePointer audioMixerNode = nodeList->soloNodeOfType(NodeType::AudioMixer);
-        auto audioClient = DependencyManager::get<AudioClient>();
+        auto audioClient = DependencyManager::get<AudioClient>().data();
         if (audioMixerNode || force) {
             STAT_UPDATE(audioMixerKbps, (int)roundf(
                 bandwidthRecorder->getAverageInputKilobitsPerSecond(NodeType::AudioMixer) +

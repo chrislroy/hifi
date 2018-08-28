@@ -147,9 +147,11 @@ Menu::Menu() {
     auto assetServerAction = addActionToQMenuAndActionHash(editMenu, MenuOption::AssetServer,
                                                            Qt::CTRL | Qt::SHIFT | Qt::Key_A,
                                                            qApp, SLOT(showAssetServerWidget()));
-    auto nodeList = DependencyManager::get<NodeList>();
-    QObject::connect(nodeList.data(), &NodeList::canWriteAssetsChanged, assetServerAction, &QAction::setEnabled);
-    assetServerAction->setEnabled(nodeList->getThisNodeCanWriteAssets());
+    {
+        auto nodeList = DependencyManager::get<NodeList>();
+        QObject::connect(nodeList.data(), &NodeList::canWriteAssetsChanged, assetServerAction, &QAction::setEnabled);
+        assetServerAction->setEnabled(nodeList->getThisNodeCanWriteAssets());
+    }
 
     // Edit > Package Model as .fst...
     addActionToQMenuAndActionHash(editMenu, MenuOption::PackageModel, 0,
@@ -273,13 +275,6 @@ Menu::Menu() {
     connect(action, &QAction::triggered, [] {
         qApp->showDialog(QString("hifi/dialogs/GraphicsPreferencesDialog.qml"),
             QString("hifi/tablet/TabletGraphicsPreferences.qml"), "GraphicsPreferencesDialog");
-    });
-
-    // Settings > Attachments...
-    action = addActionToQMenuAndActionHash(settingsMenu, MenuOption::Attachments);
-    connect(action, &QAction::triggered, [] {
-        qApp->showDialog(QString("hifi/dialogs/AttachmentsDialog.qml"),
-                         QString("hifi/tablet/TabletAttachmentsDialog.qml"), "AttachmentsDialog");
     });
 
     // Settings > Developer Menu
@@ -456,6 +451,9 @@ Menu::Menu() {
         });
     }
 
+    addCheckableActionToQMenuAndActionHash(renderOptionsMenu, MenuOption::ComputeBlendshapes, 0, true,
+        DependencyManager::get<ModelBlender>().data(), SLOT(setComputeBlendshapes(bool)));
+
     // Developer > Assets >>>
     // Menu item is not currently needed but code should be kept in case it proves useful again at some stage.
 //#define WANT_ASSET_MIGRATION
@@ -620,8 +618,11 @@ Menu::Menu() {
     addCheckableActionToQMenuAndActionHash(networkMenu, MenuOption::SendWrongProtocolVersion, 0, false,
                 qApp, SLOT(sendWrongProtocolVersionsSignature(bool)));
 
-    addCheckableActionToQMenuAndActionHash(networkMenu, MenuOption::SendWrongDSConnectVersion, 0, false,
-                                           nodeList.data(), SLOT(toggleSendNewerDSConnectVersion(bool)));
+    {
+        auto nodeList = DependencyManager::get<NodeList>();
+        addCheckableActionToQMenuAndActionHash(networkMenu, MenuOption::SendWrongDSConnectVersion, 0, false,
+            nodeList.data(), SLOT(toggleSendNewerDSConnectVersion(bool)));
+    }
     #endif
 
 
@@ -655,10 +656,9 @@ Menu::Menu() {
 
     action = addActionToQMenuAndActionHash(audioDebugMenu, "Stats...");
     connect(action, &QAction::triggered, [] {
-        auto scriptEngines = DependencyManager::get<ScriptEngines>();
         QUrl defaultScriptsLoc = PathUtils::defaultScriptsLocation();
         defaultScriptsLoc.setPath(defaultScriptsLoc.path() + "developer/utilities/audio/stats.js");
-        scriptEngines->loadScript(defaultScriptsLoc.toString());
+        DependencyManager::get<ScriptEngines>()->loadScript(defaultScriptsLoc.toString());
     });
 
     action = addActionToQMenuAndActionHash(audioDebugMenu, "Buffers...");
@@ -667,16 +667,14 @@ Menu::Menu() {
             QString("hifi/tablet/TabletAudioBuffers.qml"), "AudioBuffersDialog");
     });
 
-    auto audioIO = DependencyManager::get<AudioClient>();
     addActionToQMenuAndActionHash(audioDebugMenu, MenuOption::MuteEnvironment, 0,
-        audioIO.data(), SLOT(sendMuteEnvironmentPacket()));
+        DependencyManager::get<AudioClient>().data(), SLOT(sendMuteEnvironmentPacket()));
 
     action = addActionToQMenuAndActionHash(audioDebugMenu, MenuOption::AudioScope);
     connect(action, &QAction::triggered, [] {
-        auto scriptEngines = DependencyManager::get<ScriptEngines>();
         QUrl defaultScriptsLoc = PathUtils::defaultScriptsLocation();
         defaultScriptsLoc.setPath(defaultScriptsLoc.path() + "developer/utilities/audio/audioScope.js");
-        scriptEngines->loadScript(defaultScriptsLoc.toString());
+        DependencyManager::get<ScriptEngines>()->loadScript(defaultScriptsLoc.toString());
     });
 
     // Developer > Physics >>>
@@ -756,10 +754,9 @@ Menu::Menu() {
      // Developer > API Debugger
     action = addActionToQMenuAndActionHash(developerMenu, "API Debugger");
     connect(action, &QAction::triggered, [] {
-        auto scriptEngines = DependencyManager::get<ScriptEngines>();
         QUrl defaultScriptsLoc = PathUtils::defaultScriptsLocation();
         defaultScriptsLoc.setPath(defaultScriptsLoc.path() + "developer/utilities/tools/currentAPI.js");
-        scriptEngines->loadScript(defaultScriptsLoc.toString());
+        DependencyManager::get<ScriptEngines>()->loadScript(defaultScriptsLoc.toString());
     });
 
     // Developer > Log...
@@ -767,11 +764,14 @@ Menu::Menu() {
                                   qApp, SLOT(toggleLogDialog()));
     auto essLogAction = addActionToQMenuAndActionHash(developerMenu, MenuOption::EntityScriptServerLog, 0,
                                                       qApp, SLOT(toggleEntityScriptServerLogDialog()));
-    QObject::connect(nodeList.data(), &NodeList::canRezChanged, essLogAction, [essLogAction] {
+    {
         auto nodeList = DependencyManager::get<NodeList>();
+        QObject::connect(nodeList.data(), &NodeList::canRezChanged, essLogAction, [essLogAction] {
+            auto nodeList = DependencyManager::get<NodeList>();
+            essLogAction->setEnabled(nodeList->getThisNodeCanRez());
+        });
         essLogAction->setEnabled(nodeList->getThisNodeCanRez());
-    });
-    essLogAction->setEnabled(nodeList->getThisNodeCanRez());
+    }
 
     addActionToQMenuAndActionHash(developerMenu, "Script Log (HMD friendly)...", Qt::NoButton,
                                            qApp, SLOT(showScriptLogs()));
