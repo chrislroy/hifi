@@ -300,6 +300,15 @@ Menu::Menu() {
         qApp->setHmdTabletBecomesToolbarSetting(action->isChecked());
     });
 
+    action = addActionToQMenuAndActionHash(uiOptionsMenu, "Scene Graph...");
+    connect(action, &QAction::triggered, [] {
+        QMessageBox::information(0, "Scene Graph", "Open");
+        //QUrl defaultScriptsLoc = PathUtils::defaultScriptsLocation();
+        //defaultScriptsLoc.setPath(defaultScriptsLoc.path() + "developer/utilities/audio/stats.js");
+        //DependencyManager::get<ScriptEngines>()->loadScript(defaultScriptsLoc.toString());
+    });
+
+
     // Developer > Render >>>
     MenuWrapper* renderOptionsMenu = developerMenu->addMenu("Render");
 

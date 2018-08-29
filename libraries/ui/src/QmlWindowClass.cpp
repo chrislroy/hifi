@@ -86,7 +86,7 @@ QScriptValue QmlWindowClass::internal_constructor(QScriptContext* context, QScri
 }
 
 QmlWindowClass::QmlWindowClass(bool restricted) : _restricted(restricted) {
-
+     // qDebug("**** CROY **** QmlWindowClass::QmlWindowClass");
 }
 
 /**jsdoc
