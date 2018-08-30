@@ -20,11 +20,10 @@ StackView {
                                   "height": editRoot.availableHeight }
     Component.onCompleted: {
         tab.currentIndex = 0
-        console.log("**** CROY **** eventBridge:" + eventBridge)
-        if (eventBridge) {
-            console.log("**** CROY **** EditTools.qml connect eventBridge.scriptEventReceived !!!")
-            eventBridge.scriptEventReceived.connect(eventReceived);
-        }
+        //console.log("**** CROY **** eventBridge:" + eventBridge)
+        //if (eventBridge) {
+        //    eventBridge.scriptEventReceived.connect(eventReceived);
+        //}
     }
 
     background: Rectangle {
@@ -62,11 +61,10 @@ StackView {
     }
 
     function eventReceived(data) {
-        console.log("**** CROY **** EditTools.qml eventReceived type:" + data.type);
+        console.log("**** CROY **** EditTools.qml eventReceived type:" + JSON.stringify(data));
         if (data.type == "update") {
             // console.log("**** CROY **** EditTools.qml eventReceived data:" + JSON.stringify(data));
         }
-        
     }
 
 }

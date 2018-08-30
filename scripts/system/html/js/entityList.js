@@ -51,7 +51,7 @@ function loaded() {
         elNoEntitiesRadius = document.getElementById("no-entities-radius");
         elEntityTableScroll = document.getElementById("entity-table-scroll");
 
-        console.log("**** CROY **** - editList.js")
+        //console.log("**** CROY **** - editList.js")
         document.getElementById("entity-name").onclick = function() {
             setSortColumn('name');
         };
@@ -160,7 +160,7 @@ function loaded() {
         function addEntity(id, name, type, url, locked, visible, verticesCount, texturesCount, texturesSize, hasTransparent,
                            isBaked, drawCalls, hasScript) {
 
-            console.log("**** CROY **** - addEntity" + name)
+            //console.log("**** CROY **** - addEntity" + name)
 
             var urlParts = url.split('/');
             var filename = urlParts[urlParts.length - 1];
@@ -249,7 +249,7 @@ function loaded() {
 
         function refreshEntities() {
 
-            console.log("**** CROY **** refreshEntities");
+            //console.log("**** CROY **** refreshEntities");
             clearEntities();
             EventBridge.emitWebEvent(JSON.stringify({ type: 'refresh' }));
         }
@@ -360,7 +360,7 @@ function loaded() {
             EventBridge.scriptEventReceived.connect(function(data) {
                 data = JSON.parse(data);
 
-                console.log("**** CROY **** data: " + JSON.stringify(data));
+                //console.log("**** CROY **** data: " + data.type);
 
                 if (data.type === "clearEntityList") {
                     clearEntities();

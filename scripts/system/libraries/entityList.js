@@ -186,7 +186,7 @@ EntityListTool = function(shouldUseEditTabletApp) {
         try {
             data = JSON.parse(data);
 
-            console.log("**** CROY **** onWebEventReceived " + JSON.stringify(data));
+            //console.log("**** CROY **** onWebEventReceived " + JSON.stringify(data));
 
         } catch(e) {
             print("entityList.js: Error parsing JSON: " + e.name + " data " + data);
