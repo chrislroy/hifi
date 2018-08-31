@@ -45,17 +45,17 @@ public:
     QHash<EntityItemID, EntityItemID>* map;
 };
 
-class NameManager : public QObject{
+class SceneGraph : public QObject {
     Q_OBJECT
 public:
-    NameManager(const QHash<EntityItemID, EntityItemPointer>& theMap) : _entityMap(theMap) {}
+    SceneGraph(const QHash<EntityItemID, EntityItemPointer>& theMap) : _entityMap(theMap) {}
 
 public slots:
 
     void generateEntityName(const EntityItemID& entityID);
+    void generateSceneModel();
 
 private:
-
     mutable QReadWriteLock _entityMapLock;
     QHash<QString, EntityItemPointer> _nameMap;
 
@@ -391,6 +391,10 @@ signals:
     void clearingEntities();
     void killChallengeOwnershipTimeoutTimer(const QString& certID);
 
+    // new signals added for HP work
+    void updateEntityName(const EntityItemID& entityID);
+    void updateSceneModel();
+
 protected:
     void processRemovedEntities(const DeleteEntityOperator& theOperator);
     bool updateEntity(EntityItemPointer entity,
@@ -509,7 +513,7 @@ private:
 
     std::map<QString, QString> _namedPaths;
 
-    NameManager* _nameManager = nullptr;
+    SceneGraph* _nameManager = nullptr;
 };
 
 #endif  // hifi_EntityTree_h

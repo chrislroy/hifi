@@ -89,8 +89,9 @@ EntityTree::EntityTree(bool shouldReaverage) : Octree(shouldReaverage) {
 
     EntityItem::retrieveMarketplacePublicKey();
 
-    _nameManager = new NameManager(_entityMap);
-    connect(this, &EntityTree::addingEntity, _nameManager, &NameManager::generateEntityName, Qt::QueuedConnection);
+    _nameManager = new SceneGraph(_entityMap);
+    connect(this, &EntityTree::updateEntityName, _nameManager, &SceneGraph::generateEntityName, Qt::QueuedConnection);
+    connect(this, &EntityTree::updateSceneModel, _nameManager, &SceneGraph::generateSceneModel, Qt::QueuedConnection);
 }
 
 EntityTree::~EntityTree() {
@@ -448,8 +449,7 @@ bool EntityTree::updateEntity(EntityItemPointer entity,
         // else client accepts what the server says
 
         if (properties.needToUpdateName()) {
-            emit addingEntity(entity->getEntityItemID());
-            ///qDebug() << "<<<<<<<<<<<<<<<<<<" << qPrintable(entity->getName()) << ">>>>>>>>>>>>>>>>>>";
+            emit updateEntityName(entity->getEntityItemID());
         }
 
         QString entityScriptBefore = entity->getScript();
@@ -2741,7 +2741,9 @@ bool EntityTree::removeMaterialFromOverlay(const QUuid& overlayID,
 // so box-1 and box-2 are valid
 // when reparenting an entity - the index is removed from the name and regenerated
 // so box-1 becomes box which becomes box-xxx where xxx is the first index not present under that entity
-void NameManager::generateEntityName(const EntityItemID& entityID) {
+void SceneGraph::generateEntityName(const EntityItemID& entityID) {
+    qDebug() << "SceneGraph::generateEntityName";
+
     auto entity = _entityMap.value(entityID);
 
     // start with suggested name - current one of type name
@@ -2750,9 +2752,11 @@ void NameManager::generateEntityName(const EntityItemID& entityID) {
         suggestedName = entity->getName();
 
     } else {
-        suggestedName = EntityTypes::getEntityTypeName(entity->getType());
+        if (_entityMap.count() == 1)
+            suggestedName = "Stage";
+        else
+            suggestedName = EntityTypes::getEntityTypeName(entity->getType());
     }
-    
 
     // check if parent.. if not - return suggested name
     auto parentId = entity->getParentID();
@@ -2783,9 +2787,13 @@ void NameManager::generateEntityName(const EntityItemID& entityID) {
     auto testName = suggestedName;
     int index = 1;
     while (childrenNames.contains(testName)) {
-
         testName = QString("%1-%2").arg(suggestedName.section('-', 0, 0)).arg(index++);
     }
     qDebug() << "-------------- Renaming entity from <" << qPrintable(suggestedName) << " to " << qPrintable(testName);
     entity->setName(testName);
+}
+
+void SceneGraph::generateSceneModel() 
+{
+    qDebug() << "SceneGraph::generateSceneModel";
 }
