@@ -242,7 +242,7 @@ TabBar {
     }
 
     EditTabButton {
-        title: "PROPERTIES *** "
+        title: "PROPERTIES"
         active: true
         enabled: true
         property string originalUrl: ""
@@ -257,7 +257,7 @@ TabBar {
     }
 
     EditTabButton {
-        title: "GRID *** "
+        title: "GRID"
         active: true
         enabled: true
         property string originalUrl: ""
