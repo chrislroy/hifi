@@ -44,7 +44,7 @@ TabBar {
 
         property Component visualItem: Component {
             WebView {
-                id: entityListToolWebView2
+                id: sceneGraphToolWebView2
                 url: Paths.defaultScripts + "/system/html/entityList.html"
                 enabled: true
             }
