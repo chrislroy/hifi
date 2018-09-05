@@ -2580,6 +2580,8 @@ Application::~Application() {
     // remove the NodeList from the DependencyManager
     DependencyManager::destroy<NodeList>();
 
+    DependencyManager::destroy<Preferences>();
+
 #if 0
     ConnexionClient::getInstance().destroy();
 #endif
@@ -2820,7 +2822,7 @@ void Application::initializeUi() {
     qmlRegisterType<Preference>("Hifi", 1, 0, "Preference");
     qmlRegisterType<WebBrowserSuggestionsEngine>("HifiWeb", 1, 0, "WebBrowserSuggestionsEngine");
 
-    qmlRegisterType<SceneGraph>("SceneGraph", 1, 0, "sceneGraph");
+    qmlRegisterType<SceneGraph>("com.hewlett-packard.qmlcomponents", 1, 0, "SceneGraph");
 
     {
         auto tabletScriptingInterface = DependencyManager::get<TabletScriptingInterface>();
@@ -3022,6 +3024,14 @@ void Application::onDesktopRootContextCreated(QQmlContext* surfaceContext) {
     if (auto steamClient = PluginManager::getInstance()->getSteamClientPlugin()) {
         surfaceContext->setContextProperty("Steam", new SteamScriptingInterface(engine, steamClient.get()));
     }
+
+    // HACK - create bogus SceneGraph
+    QFile file("D:/Projects/croy/hifi/default.txt");
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        qDebug("Critical error, cannot open default text file!");
+    SceneGraph* model = new SceneGraph(file.readAll()); // should be singleton!!!
+    file.close();
+    surfaceContext->setContextProperty("sceneGraph", model);
 
     _window->setMenuBar(new Menu());
 }

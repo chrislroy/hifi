@@ -3,6 +3,7 @@ import QtQuick.Controls 2.2
 import QtQuick.Controls 1.4
 import QtQml.Models 2.2
 import QtWebChannel 1.0
+
 import "../../controls"
 import "../toolbars"
 import QtGraphicalEffects 1.0
@@ -71,36 +72,18 @@ TabBar {
                     }
 
                     TreeView {
-                        id: view
                         anchors.fill: parent
-                        anchors.margins: 2 * 12 + row.height
                         model: sceneGraph
+                        itemDelegate: TreeDelegate {}
 
                         TableViewColumn {
                             title: "Name"
-                            role: "fileName"
-                            resizable: true
+                            role: "name"
                         }
 
                         TableViewColumn {
-                            title: "Size"
-                            role: "size"
-                            resizable: true
-                            horizontalAlignment : Text.AlignRight
-                            width: 70
-                        }
-
-                        TableViewColumn {
-                            title: "Permissions"
-                            role: "displayableFilePermissions"
-                            resizable: true
-                            width: 100
-                        }
-
-                        TableViewColumn {
-                            title: "Date Modified"
-                            role: "lastModified"
-                            resizable: true
+                            title: "Type"
+                            role: "type"
                         }
 
                     }

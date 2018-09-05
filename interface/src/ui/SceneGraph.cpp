@@ -2,67 +2,58 @@
 
 #include "SceneNode.h"
 #include "SceneGraph.h"
-
 #include <QStringList>
 
-//! [0]
+
 SceneGraph::SceneGraph(const QString& data, QObject* parent) : QAbstractItemModel(parent) {
+
+    m_roleNameMapping[TreeModelRoleName] = "name";
+    m_roleNameMapping[TreeModelRoleDescription] = "type";
+
     QList<QVariant> rootData;
-    rootData << "Title"
-             << "Summary";
+
+    rootData << "Name" << "Type";
     rootItem = new SceneNode(rootData);
     setupModelData(data.split(QString("\n")), rootItem);
 }
-//! [0]
 
-//! [1]
 SceneGraph::~SceneGraph() {
     delete rootItem;
 }
-//! [1]
 
-//! [2]
 int SceneGraph::columnCount(const QModelIndex& parent) const {
     if (parent.isValid())
         return static_cast<SceneNode*>(parent.internalPointer())->columnCount();
     else
         return rootItem->columnCount();
 }
-//! [2]
 
-//! [3]
 QVariant SceneGraph::data(const QModelIndex& index, int role) const {
     if (!index.isValid())
         return QVariant();
 
-    if (role != Qt::DisplayRole)
+    if (role != TreeModelRoleName && role != TreeModelRoleDescription)
         return QVariant();
 
     SceneNode* item = static_cast<SceneNode*>(index.internalPointer());
 
-    return item->data(index.column());
+    return item->data(role - Qt::UserRole - 1);
 }
-//! [3]
 
-//! [4]
 Qt::ItemFlags SceneGraph::flags(const QModelIndex& index) const {
     if (!index.isValid())
         return 0;
 
     return QAbstractItemModel::flags(index);
 }
-//! [4]
 
-//! [5]
 QVariant SceneGraph::headerData(int section, Qt::Orientation orientation, int role) const {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
         return rootItem->data(section);
 
     return QVariant();
 }
-//! [5]
 
-//! [6]
 QModelIndex SceneGraph::index(int row, int column, const QModelIndex& parent) const {
     if (!hasIndex(row, column, parent))
         return QModelIndex();
@@ -80,9 +71,11 @@ QModelIndex SceneGraph::index(int row, int column, const QModelIndex& parent) co
     else
         return QModelIndex();
 }
-//! [6]
 
-//! [7]
+QHash<int, QByteArray> SceneGraph::roleNames() const {
+    return m_roleNameMapping;
+}
+
 QModelIndex SceneGraph::parent(const QModelIndex& index) const {
     if (!index.isValid())
         return QModelIndex();
@@ -95,9 +88,7 @@ QModelIndex SceneGraph::parent(const QModelIndex& index) const {
 
     return createIndex(parentItem->row(), 0, parentItem);
 }
-//! [7]
 
-//! [8]
 int SceneGraph::rowCount(const QModelIndex& parent) const {
     SceneNode* parentItem;
     if (parent.column() > 0)
@@ -110,7 +101,7 @@ int SceneGraph::rowCount(const QModelIndex& parent) const {
 
     return parentItem->childCount();
 }
-//! [8]
+
 
 void SceneGraph::setupModelData(const QStringList& lines, SceneNode* parent) {
     QList<SceneNode*> parents;
