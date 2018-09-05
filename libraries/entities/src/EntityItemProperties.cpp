@@ -305,7 +305,7 @@ void EntityItemProperties::setMaterialMappingModeFromString(const QString& mater
 }
 
 // need to update name when user specified a new one or we reparent the entity
-bool EntityItemProperties::needToUpdateName() const {
+bool EntityItemProperties::needToUpdateModel() const {
     EntityPropertyFlags changedProperties;
     CHECK_PROPERTY_CHANGE(PROP_NAME, name);
     CHECK_PROPERTY_CHANGE(PROP_PARENT_ID, parentID);

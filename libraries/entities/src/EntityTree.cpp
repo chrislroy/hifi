@@ -89,9 +89,8 @@ EntityTree::EntityTree(bool shouldReaverage) : Octree(shouldReaverage) {
 
     EntityItem::retrieveMarketplacePublicKey();
 
-    _nameManager = new SceneGraph(_entityMap);
-    connect(this, &EntityTree::updateEntityName, _nameManager, &SceneGraph::generateEntityName, Qt::QueuedConnection);
-    connect(this, &EntityTree::updateSceneModel, _nameManager, &SceneGraph::generateSceneModel, Qt::QueuedConnection);
+    _nameManager = new SceneChangeListener(_entityMap);
+    connect(this, &EntityTree::updateEntityName, _nameManager, &SceneChangeListener::generateEntityName, Qt::QueuedConnection);
 }
 
 EntityTree::~EntityTree() {
@@ -448,7 +447,7 @@ bool EntityTree::updateEntity(EntityItemPointer entity,
         }
         // else client accepts what the server says
 
-        if (properties.needToUpdateName()) {
+        if (properties.needToUpdateModel()) {
             emit updateEntityName(entity->getEntityItemID());
         }
 
@@ -2741,7 +2740,7 @@ bool EntityTree::removeMaterialFromOverlay(const QUuid& overlayID,
 // so box-1 and box-2 are valid
 // when reparenting an entity - the index is removed from the name and regenerated
 // so box-1 becomes box which becomes box-xxx where xxx is the first index not present under that entity
-void SceneGraph::generateEntityName(const EntityItemID& entityID) {
+void SceneChangeListener::generateEntityName(const EntityItemID& entityID) {
     qDebug() << "SceneGraph::generateEntityName";
 
     auto entity = _entityMap.value(entityID);
@@ -2791,9 +2790,11 @@ void SceneGraph::generateEntityName(const EntityItemID& entityID) {
     }
     qDebug() << "-------------- Renaming entity from <" << qPrintable(suggestedName) << " to " << qPrintable(testName);
     entity->setName(testName);
+
+    generateSceneModel();
 }
 
-void SceneGraph::generateSceneModel() 
+void SceneChangeListener::generateSceneModel() 
 {
     qDebug() << "SceneGraph::generateSceneModel";
 }

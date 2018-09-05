@@ -97,7 +97,7 @@ public:
     float getEditedAgo() const /// Elapsed seconds since this entity was last edited
         { return (float)(usecTimestampNow() - getLastEdited()) / (float)USECS_PER_SECOND; }
 
-    bool needToUpdateName() const;
+    bool needToUpdateModel() const;
     EntityPropertyFlags getChangedProperties() const;
 
     bool transformChanged() const;

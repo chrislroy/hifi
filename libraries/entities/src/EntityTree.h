@@ -45,15 +45,16 @@ public:
     QHash<EntityItemID, EntityItemID>* map;
 };
 
-class SceneGraph : public QObject {
+class SceneChangeListener : public QObject {
     Q_OBJECT
 public:
-    SceneGraph(const QHash<EntityItemID, EntityItemPointer>& theMap) : _entityMap(theMap) {}
+    SceneChangeListener(const QHash<EntityItemID, EntityItemPointer>& theMap) : _entityMap(theMap) {}
+
+private:
+    void generateSceneModel();
 
 public slots:
-
     void generateEntityName(const EntityItemID& entityID);
-    void generateSceneModel();
 
 private:
     mutable QReadWriteLock _entityMapLock;
@@ -393,7 +394,6 @@ signals:
 
     // new signals added for HP work
     void updateEntityName(const EntityItemID& entityID);
-    void updateSceneModel();
 
 protected:
     void processRemovedEntities(const DeleteEntityOperator& theOperator);
@@ -513,7 +513,7 @@ private:
 
     std::map<QString, QString> _namedPaths;
 
-    SceneGraph* _nameManager = nullptr;
+    SceneChangeListener* _nameManager = nullptr;
 };
 
 #endif  // hifi_EntityTree_h

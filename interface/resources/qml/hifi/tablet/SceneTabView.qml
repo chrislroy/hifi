@@ -1,5 +1,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.2
+import QtQuick.Controls 1.4
+import QtQml.Models 2.2
 import QtWebChannel 1.0
 import "../../controls"
 import "../toolbars"
@@ -43,13 +45,69 @@ TabBar {
         property string originalUrl: ""
 
         property Component visualItem: Component {
-            WebView {
-                id: sceneGraphWebView
-                url: Paths.defaultScripts + "/system/html/entityList.html"
-                enabled: true
-            }
-        }
-    }
+
+            Rectangle {
+                color: "#404040"
+                id: container
+
+                Flickable {
+                    height: parent.height
+                    width: parent.width
+                    clip: true
+
+                    contentHeight: createEntitiesFlow.height + importButton.height + assetServerButton.height +
+                                   header.anchors.topMargin + createEntitiesFlow.anchors.topMargin +
+                                   assetServerButton.anchors.topMargin + importButton.anchors.topMargin +
+                                   header.paintedHeight
+
+                    contentWidth: width
+
+                    ScrollBar.vertical : ScrollBar {
+                        visible: parent.contentHeight > parent.height
+                        width: 20
+                        background: Rectangle {
+                            color: hifi.colors.tableScrollBackgroundDark
+                        }
+                    }
+
+                    TreeView {
+                        id: view
+                        anchors.fill: parent
+                        anchors.margins: 2 * 12 + row.height
+                        model: sceneGraph
+
+                        TableViewColumn {
+                            title: "Name"
+                            role: "fileName"
+                            resizable: true
+                        }
+
+                        TableViewColumn {
+                            title: "Size"
+                            role: "size"
+                            resizable: true
+                            horizontalAlignment : Text.AlignRight
+                            width: 70
+                        }
+
+                        TableViewColumn {
+                            title: "Permissions"
+                            role: "displayableFilePermissions"
+                            resizable: true
+                            width: 100
+                        }
+
+                        TableViewColumn {
+                            title: "Date Modified"
+                            role: "lastModified"
+                            resizable: true
+                        }
+
+                    }
+                } // Flickable
+            } // Rectangle
+        } // Component
+    } // EditTabButton
     
 
     function fromScript(message) {

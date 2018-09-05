@@ -201,6 +201,7 @@
 #include "Util.h"
 #include "InterfaceParentFinder.h"
 #include "ui/OctreeStatsProvider.h"
+#include "ui/SceneGraph.h"              // new scene graph model
 
 #include <GPUIdent.h>
 #include <gl/GLHelpers.h>
@@ -2235,7 +2236,7 @@ Application::Application(int& argc, char** argv, QElapsedTimer& startupTimer, bo
 
     // Preload Tablet sounds
     DependencyManager::get<TabletScriptingInterface>()->preloadSounds();
-                                                     
+
     _pendingIdleEvent = false;
     _pendingRenderEvent = false;
 
@@ -2818,6 +2819,8 @@ void Application::initializeUi() {
     qmlRegisterType<ResourceImageItem>("Hifi", 1, 0, "ResourceImageItem");
     qmlRegisterType<Preference>("Hifi", 1, 0, "Preference");
     qmlRegisterType<WebBrowserSuggestionsEngine>("HifiWeb", 1, 0, "WebBrowserSuggestionsEngine");
+
+    qmlRegisterType<SceneGraph>("SceneGraph", 1, 0, "sceneGraph");
 
     {
         auto tabletScriptingInterface = DependencyManager::get<TabletScriptingInterface>();
