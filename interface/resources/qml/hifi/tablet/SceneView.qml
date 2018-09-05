@@ -20,11 +20,16 @@ StackView {
                                   "height": sceneView.availableHeight }
     Component.onCompleted: {
         tab.currentIndex = 0
+
+        console.log("**** CROY **** eventBridge:" + eventBridge)
+        if (eventBridge) {
+            eventBridge.scriptEventReceived.connect(eventReceived);
+        }
     }
 
     background: Rectangle {
         color: "#404040" //default background color
-        EditEntityList {
+        SceneTabView {
             id: tab
             anchors.fill: parent
             currentIndex: -1
@@ -57,4 +62,10 @@ StackView {
         }
     }
 
+    function eventReceived(data) {
+        console.log("**** CROY **** SceneView.qml eventReceived type:" + JSON.stringify(data));
+        if (data.type == "update") {
+            // console.log("**** CROY **** EditTools.qml eventReceived data:" + JSON.stringify(data));
+        }
+    }
 }

@@ -139,6 +139,7 @@ EntityListTool = function(shouldUseEditTabletApp) {
                 }
                 entities.push({
                     id: id,
+                    parent: properties.parentID,
                     name: properties.name,
                     type: properties.type,
                     url: url,
