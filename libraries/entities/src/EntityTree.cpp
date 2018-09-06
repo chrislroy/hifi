@@ -91,6 +91,7 @@ EntityTree::EntityTree(bool shouldReaverage) : Octree(shouldReaverage) {
 
     _nameManager = new SceneChangeListener(_entityMap);
     connect(this, &EntityTree::updateEntityName, _nameManager, &SceneChangeListener::generateEntityName, Qt::QueuedConnection);
+    connect(this, &EntityTree::addingEntity, _nameManager, &SceneChangeListener::generateEntityName, Qt::QueuedConnection);
 }
 
 EntityTree::~EntityTree() {
