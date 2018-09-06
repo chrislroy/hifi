@@ -50,16 +50,10 @@ class SceneChangeListener : public QObject {
 public:
     SceneChangeListener(const QHash<EntityItemID, EntityItemPointer>& theMap) : _entityMap(theMap) {}
 
-private:
-    void generateSceneModel();
-
 public slots:
     void generateEntityName(const EntityItemID& entityID);
 
 private:
-    mutable QReadWriteLock _entityMapLock;
-    QHash<QString, EntityItemPointer> _nameMap;
-
     const QHash<EntityItemID, EntityItemPointer>& _entityMap;
 };
 
@@ -92,6 +86,10 @@ public:
         return std::static_pointer_cast<EntityTreeElement>(_rootElement);
     }
 
+    const QHash<EntityItemID, EntityItemPointer> getTreeMap() const {
+        QHash<EntityItemID, EntityItemPointer> localMap(_entityMap);
+        return localMap;
+    }
     virtual void eraseAllOctreeElements(bool createNewRoot = true) override;
 
     virtual void readBitstreamToTree(const unsigned char* bitstream,
@@ -394,6 +392,7 @@ signals:
 
     // new signals added for HP work
     void updateEntityName(const EntityItemID& entityID);
+    void updateSceneModel();
 
 protected:
     void processRemovedEntities(const DeleteEntityOperator& theOperator);

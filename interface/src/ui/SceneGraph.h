@@ -4,7 +4,8 @@
 
 #include <QAbstractItemModel>
 #include "SceneNode.h"
-
+#include "EntityItem.h"
+#include "EntityTree.h"
 #include "DependencyManager.h"
 
 class SceneGraph : public QAbstractItemModel {
@@ -17,7 +18,7 @@ public:
         TreeModelRoleDescription
     };
 
-    explicit SceneGraph(const QString& data = "", QObject* parent = 0);
+    SceneGraph(const EntityTreePointer treePointer = nullptr, QObject* parent = 0);
     ~SceneGraph();
 
     QVariant data(const QModelIndex& index, int role) const Q_DECL_OVERRIDE;
@@ -29,11 +30,15 @@ public:
     int columnCount(const QModelIndex& parent = QModelIndex()) const Q_DECL_OVERRIDE;
     QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;
 
+    void refresh();
 private:
-    void setupModelData(const QStringList& lines, SceneNode* parent);
+    void setupModelData();
 
-    SceneNode* rootItem;
+    SceneNode* _rootItem;
     QHash<int, QByteArray> m_roleNameMapping;
+    QHash<QUuid, SceneNode*> _nodeMap;
+
+    const EntityTreePointer _treePointer;
 };
 
 #endif  // SCENEGRAPH_H

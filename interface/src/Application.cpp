@@ -3025,16 +3025,18 @@ void Application::onDesktopRootContextCreated(QQmlContext* surfaceContext) {
         surfaceContext->setContextProperty("Steam", new SteamScriptingInterface(engine, steamClient.get()));
     }
 
-    // HACK - create bogus SceneGraph
-    QFile file("D:/Projects/croy/hifi/default.txt");
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        qDebug("Critical error, cannot open default text file!");
-    SceneGraph* model = new SceneGraph(file.readAll()); // should be singleton!!!
-    file.close();
-    surfaceContext->setContextProperty("sceneGraph", model);
+    surfaceContext->setContextProperty("sceneGraph", _model);
 
     _window->setMenuBar(new Menu());
 }
+
+void Application::updateSceneModel()
+{  
+    auto surfaceContext = DependencyManager::get<OffscreenUi>()->getSurfaceContext();
+    _model->refresh();
+    surfaceContext->setContextProperty("sceneGraph", _model);
+
+ }
 
 void Application::onDesktopRootItemCreated(QQuickItem* rootItem) {
     Stats::show();
@@ -4944,6 +4946,11 @@ void Application::init() {
                 }
             },
             Qt::QueuedConnection);
+
+
+    _model = new SceneGraph(tree);
+
+    connect(tree.get(), &EntityTree::updateSceneModel, this, &Application::updateSceneModel);
 
     _gameWorkload.startup(getEntities()->getWorkloadSpace(), _main3DScene, _entitySimulation);
     _entitySimulation->setWorkloadSpace(getEntities()->getWorkloadSpace());

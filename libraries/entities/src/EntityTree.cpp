@@ -304,6 +304,7 @@ void EntityTree::postAddEntity(EntityItemPointer entity) {
     fixupNeedsParentFixups();
 
     emit addingEntity(entity->getEntityItemID());
+    emit updateSceneModel();
 }
 
 bool EntityTree::updateEntity(const EntityItemID& entityID,
@@ -450,6 +451,7 @@ bool EntityTree::updateEntity(EntityItemPointer entity,
 
         if (properties.needToUpdateModel()) {
             emit updateEntityName(entity->getEntityItemID());
+            emit updateSceneModel();
         }
 
         QString entityScriptBefore = entity->getScript();
@@ -2742,7 +2744,7 @@ bool EntityTree::removeMaterialFromOverlay(const QUuid& overlayID,
 // when reparenting an entity - the index is removed from the name and regenerated
 // so box-1 becomes box which becomes box-xxx where xxx is the first index not present under that entity
 void SceneChangeListener::generateEntityName(const EntityItemID& entityID) {
-    qDebug() << "SceneGraph::generateEntityName";
+    // qDebug() << "SceneGraph::generateEntityName";
 
     auto entity = _entityMap.value(entityID);
 
@@ -2761,21 +2763,20 @@ void SceneChangeListener::generateEntityName(const EntityItemID& entityID) {
     // check if parent.. if not - return suggested name
     auto parentId = entity->getParentID();
 
-    QReadLocker locker(&_entityMapLock);
-
     // collect all children names
     QStringList childrenNames;
+    QHash<EntityItemID, EntityItemPointer> localMap(_entityMap);
 
     if (parentId.isNull()) {
         QHash<EntityItemID, EntityItemPointer>::const_iterator itr;
-        for (itr = _entityMap.constBegin(); itr != _entityMap.constEnd(); ++itr) {
+        for (itr = localMap.constBegin(); itr != localMap.constEnd(); ++itr) {
             const EntityItemPointer& entityItem = itr.value();
             if (entityItem->getID() != entity->getID())
                 childrenNames.append(entityItem->getName());
         }
     } else {
         // get parent
-        auto parentEntity = _entityMap.value(parentId);
+        auto parentEntity = localMap.value(parentId);
 
         parentEntity->forEachChild([&](SpatiallyNestablePointer child) {
             if (child->getNestableType() == NestableType::Entity && child->getID() != entity->getID()) {
@@ -2789,13 +2790,6 @@ void SceneChangeListener::generateEntityName(const EntityItemID& entityID) {
     while (childrenNames.contains(testName)) {
         testName = QString("%1-%2").arg(suggestedName.section('-', 0, 0)).arg(index++);
     }
-    qDebug() << "-------------- Renaming entity from <" << qPrintable(suggestedName) << " to " << qPrintable(testName);
+    // qDebug() << "-------------- Renaming entity from <" << qPrintable(suggestedName) << " to " << qPrintable(testName);
     entity->setName(testName);
-
-    generateSceneModel();
-}
-
-void SceneChangeListener::generateSceneModel() 
-{
-    qDebug() << "SceneGraph::generateSceneModel";
 }

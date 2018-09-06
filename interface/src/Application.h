@@ -87,6 +87,7 @@ class MainWindow;
 class AssetUpload;
 class CompositorHelper;
 class AudioInjector;
+class SceneGraph;
 
 namespace controller {
     class StateController;
@@ -370,6 +371,8 @@ public slots:
 
     void resetSensors(bool andReload = false);
     void setActiveFaceTracker() const;
+
+    void updateSceneModel();
 
 #if (PR_BUILD || DEV_BUILD)
     void sendWrongProtocolVersionsSignature(bool checked) { ::sendWrongProtocolVersionsSignature(checked); }
@@ -747,6 +750,9 @@ private:
 
     DisplayPluginPointer _autoSwitchDisplayModeSupportedHMDPlugin;
     QString _autoSwitchDisplayModeSupportedHMDPluginName;
+
+    SceneGraph* _model{ nullptr };
+
     bool _previousHMDWornStatus;
     void startHMDStandBySession();
     void endHMDSession();

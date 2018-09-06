@@ -5,27 +5,25 @@
 #include <QStringList>
 
 
-SceneGraph::SceneGraph(const QString& data, QObject* parent) : QAbstractItemModel(parent) {
-
+SceneGraph::SceneGraph(const EntityTreePointer treePointer, QObject* parent)
+    : _treePointer(treePointer)
+    , _rootItem(nullptr)
+{
     m_roleNameMapping[TreeModelRoleName] = "name";
     m_roleNameMapping[TreeModelRoleDescription] = "type";
 
-    QList<QVariant> rootData;
-
-    rootData << "Name" << "Type";
-    rootItem = new SceneNode(rootData);
-    setupModelData(data.split(QString("\n")), rootItem);
+    setupModelData();
 }
 
 SceneGraph::~SceneGraph() {
-    delete rootItem;
+    delete _rootItem;
 }
 
 int SceneGraph::columnCount(const QModelIndex& parent) const {
     if (parent.isValid())
         return static_cast<SceneNode*>(parent.internalPointer())->columnCount();
     else
-        return rootItem->columnCount();
+        return _rootItem->columnCount();
 }
 
 QVariant SceneGraph::data(const QModelIndex& index, int role) const {
@@ -49,7 +47,7 @@ Qt::ItemFlags SceneGraph::flags(const QModelIndex& index) const {
 
 QVariant SceneGraph::headerData(int section, Qt::Orientation orientation, int role) const {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-        return rootItem->data(section);
+        return _rootItem->data(section);
 
     return QVariant();
 }
@@ -61,7 +59,7 @@ QModelIndex SceneGraph::index(int row, int column, const QModelIndex& parent) co
     SceneNode* parentItem;
 
     if (!parent.isValid())
-        parentItem = rootItem;
+        parentItem = _rootItem;
     else
         parentItem = static_cast<SceneNode*>(parent.internalPointer());
 
@@ -83,7 +81,7 @@ QModelIndex SceneGraph::parent(const QModelIndex& index) const {
     SceneNode* childItem = static_cast<SceneNode*>(index.internalPointer());
     SceneNode* parentItem = childItem->parentItem();
 
-    if (parentItem == rootItem)
+    if (parentItem == _rootItem)
         return QModelIndex();
 
     return createIndex(parentItem->row(), 0, parentItem);
@@ -95,7 +93,7 @@ int SceneGraph::rowCount(const QModelIndex& parent) const {
         return 0;
 
     if (!parent.isValid())
-        parentItem = rootItem;
+        parentItem = _rootItem;
     else
         parentItem = static_cast<SceneNode*>(parent.internalPointer());
 
@@ -103,50 +101,65 @@ int SceneGraph::rowCount(const QModelIndex& parent) const {
 }
 
 
-void SceneGraph::setupModelData(const QStringList& lines, SceneNode* parent) {
-    QList<SceneNode*> parents;
+void SceneGraph::setupModelData()
+{
     QList<int> indentations;
-    parents << parent;
     indentations << 0;
+
+    beginResetModel();
 
     int number = 0;
 
-    while (number < lines.count()) {
-        int position = 0;
-        while (position < lines[number].length()) {
-            if (lines[number].at(position) != ' ')
-                break;
-            position++;
+    // TODO - delete all nodes - but we need to better manage the nodes
+
+    // delete exiting rootItem
+    if (_rootItem!=nullptr)
+        delete _rootItem;
+
+    // create new root item
+    QList<QVariant> rootData;
+
+    rootData << "Name"
+             << "Type";
+    _rootItem = new SceneNode(rootData);
+
+    // clear node map
+    _nodeMap.clear();
+
+    // regenerate model and populate node map
+    const QHash<EntityItemID, EntityItemPointer> treeMap = _treePointer->getTreeMap();
+
+    for (auto itr = treeMap.constBegin(); itr != treeMap.constEnd(); ++itr) {
+        const EntityItemPointer& entityItem = itr.value();
+        auto name = entityItem->getName();
+        auto type = EntityTypes::getEntityTypeName(entityItem->getType());
+        auto id = entityItem->getID();
+        auto parentId = entityItem->getParentID();
+
+        QList<QVariant> columnData;
+        columnData << name;
+        columnData << type;
+
+        if (parentId.isNull()) {
+            qDebug() << "adding to root";
+            auto node = new SceneNode(columnData, _rootItem);
+            _rootItem->appendChild(node);
+            _nodeMap[id] = node;
         }
-
-        QString lineData = lines[number].mid(position).trimmed();
-
-        if (!lineData.isEmpty()) {
-            // Read the column data from the rest of the line.
-            QStringList columnStrings = lineData.split("\t", QString::SkipEmptyParts);
-            QList<QVariant> columnData;
-            for (int column = 0; column < columnStrings.count(); ++column)
-                columnData << columnStrings[column];
-
-            if (position > indentations.last()) {
-                // The last child of the current parent is now the new parent
-                // unless the current parent has no children.
-
-                if (parents.last()->childCount() > 0) {
-                    parents << parents.last()->child(parents.last()->childCount() - 1);
-                    indentations << position;
-                }
-            } else {
-                while (position < indentations.last() && parents.count() > 0) {
-                    parents.pop_back();
-                    indentations.pop_back();
-                }
-            }
-
-            // Append a new item to the current parent's list of children.
-            parents.last()->appendChild(new SceneNode(columnData, parents.last()));
+        else {
+            auto parent = _nodeMap[parentId];
+            auto node = new SceneNode(columnData, parent);
+            parent->appendChild(node);
+            _nodeMap[id] = node;
         }
-
-        ++number;
     }
+
+    endResetModel();
+}
+
+void SceneGraph::refresh()
+{
+    qDebug() << "SceneGraph::refresh()";
+
+    setupModelData();
 }
