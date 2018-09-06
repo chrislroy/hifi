@@ -51,8 +51,6 @@ void interactiveWindowPointerFromScriptValue(const QScriptValue& object, Interac
 }
 
 InteractiveWindow::InteractiveWindow(const QString& sourceUrl, const QVariantMap& properties) {
-    // qDebug("**** CROY **** InteractiveWindow::InteractiveWindow");
-
     auto offscreenUi = DependencyManager::get<OffscreenUi>();
 
     // Build the event bridge and wrapper on the main thread

@@ -392,7 +392,7 @@ signals:
 
     // new signals added for HP work
     void updateEntityName(const EntityItemID& entityID);
-    void updateSceneModel();
+    void updateSceneModel(const EntityItemPointer&, FilterType);
 
 protected:
     void processRemovedEntities(const DeleteEntityOperator& theOperator);

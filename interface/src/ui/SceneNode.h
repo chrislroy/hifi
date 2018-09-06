@@ -18,6 +18,7 @@ public:
     int childCount() const;
     int columnCount() const;
     QVariant data(int column) const;
+    void setData(const QList<QVariant>& data);
     int row() const;
     SceneNode* parentItem();
 

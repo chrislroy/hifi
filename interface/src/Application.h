@@ -372,7 +372,7 @@ public slots:
     void resetSensors(bool andReload = false);
     void setActiveFaceTracker() const;
 
-    void updateSceneModel();
+    void updateSceneModel(const EntityItemPointer&, EntityTree::FilterType);
 
 #if (PR_BUILD || DEV_BUILD)
     void sendWrongProtocolVersionsSignature(bool checked) { ::sendWrongProtocolVersionsSignature(checked); }

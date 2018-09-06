@@ -304,7 +304,7 @@ void EntityTree::postAddEntity(EntityItemPointer entity) {
     fixupNeedsParentFixups();
 
     emit addingEntity(entity->getEntityItemID());
-    emit updateSceneModel();
+    emit updateSceneModel(entity, Add);
 }
 
 bool EntityTree::updateEntity(const EntityItemID& entityID,
@@ -451,7 +451,7 @@ bool EntityTree::updateEntity(EntityItemPointer entity,
 
         if (properties.needToUpdateModel()) {
             emit updateEntityName(entity->getEntityItemID());
-            emit updateSceneModel();
+            emit updateSceneModel(entity, Add);
         }
 
         QString entityScriptBefore = entity->getScript();
@@ -644,6 +644,7 @@ void EntityTree::deleteEntity(const EntityItemID& entityID, bool force, bool ign
     unhookChildAvatar(entityID);
     emit deletingEntity(entityID);
     emit deletingEntityPointer(existingEntity.get());
+    emit updateSceneModel(existingEntity, Delete);
 
     // NOTE: callers must lock the tree before using this method
     DeleteEntityOperator theOperator(getThisPointer(), entityID);

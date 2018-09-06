@@ -30,9 +30,9 @@ public:
     int columnCount(const QModelIndex& parent = QModelIndex()) const Q_DECL_OVERRIDE;
     QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;
 
-    void refresh();
+    void refresh(const EntityItemPointer&, EntityTree::FilterType);
 private:
-    void setupModelData();
+    void setupModelData(const EntityItemPointer& entity, EntityTree::FilterType action);
 
     SceneNode* _rootItem;
     QHash<int, QByteArray> m_roleNameMapping;

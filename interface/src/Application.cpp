@@ -2214,7 +2214,6 @@ Application::Application(int& argc, char** argv, QElapsedTimer& startupTimer, bo
                                                                 PickScriptingInterface::PICK_INCLUDE_NONCOLLIDABLE()),
                                                      0.0f, true)));
     DependencyManager::get<EntityTreeRenderer>()->setMouseRayPickResultOperator([](unsigned int rayPickID) {
-        /// qDebug("**** CROY **** picking something!!!");
         RayToEntityIntersectionResult entityResult;
         entityResult.intersects = false;
         auto pickResult = DependencyManager::get<PickManager>()->getPrevPickResultTyped<RayPickResult>(rayPickID);
@@ -3030,12 +3029,9 @@ void Application::onDesktopRootContextCreated(QQmlContext* surfaceContext) {
     _window->setMenuBar(new Menu());
 }
 
-void Application::updateSceneModel()
+void Application::updateSceneModel(const EntityItemPointer& entity, EntityTree::FilterType action)
 {  
-    auto surfaceContext = DependencyManager::get<OffscreenUi>()->getSurfaceContext();
-    _model->refresh();
-    surfaceContext->setContextProperty("sceneGraph", _model);
-
+    _model->refresh(entity, action);
  }
 
 void Application::onDesktopRootItemCreated(QQuickItem* rootItem) {
