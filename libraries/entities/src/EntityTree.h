@@ -45,18 +45,6 @@ public:
     QHash<EntityItemID, EntityItemID>* map;
 };
 
-class SceneChangeListener : public QObject {
-    Q_OBJECT
-public:
-    SceneChangeListener(const QHash<EntityItemID, EntityItemPointer>& theMap) : _entityMap(theMap) {}
-
-public slots:
-    void generateEntityName(const EntityItemID& entityID);
-
-private:
-    const QHash<EntityItemID, EntityItemPointer>& _entityMap;
-};
-
 class EntityTree : public Octree, public SpatialParentTree {
     Q_OBJECT
 public:
@@ -67,6 +55,7 @@ public:
         Physics,
         Delete
     };
+    Q_ENUM(FilterType)
     EntityTree(bool shouldReaverage = false);
     virtual ~EntityTree();
 
@@ -86,7 +75,7 @@ public:
         return std::static_pointer_cast<EntityTreeElement>(_rootElement);
     }
 
-    const QHash<EntityItemID, EntityItemPointer> getTreeMap() const {
+    QHash<EntityItemID, EntityItemPointer> getTreeMap() const {
         QHash<EntityItemID, EntityItemPointer> localMap(_entityMap);
         return localMap;
     }
@@ -391,8 +380,7 @@ signals:
     void killChallengeOwnershipTimeoutTimer(const QString& certID);
 
     // new signals added for HP work
-    void updateEntityName(const EntityItemID& entityID);
-    void updateSceneModel(const EntityItemPointer&, FilterType);
+    void updateSceneModel(QUuid, int);
 
 protected:
     void processRemovedEntities(const DeleteEntityOperator& theOperator);
@@ -497,6 +485,8 @@ private:
                                              const SharedNodePointer& senderNode);
     void validatePop(const QString& certID, const EntityItemID& entityItemID, const SharedNodePointer& senderNode);
 
+    QString generateEntityName(const EntityItemID& entityID) const;
+
     std::shared_ptr<AvatarData> _myAvatar{ nullptr };
 
     static std::function<bool(const QUuid&, graphics::MaterialLayer, const std::string&)> _addMaterialToEntityOperator;
@@ -511,8 +501,6 @@ private:
     bool _serverlessDomain{ false };
 
     std::map<QString, QString> _namedPaths;
-
-    SceneChangeListener* _nameManager = nullptr;
 };
 
 #endif  // hifi_EntityTree_h

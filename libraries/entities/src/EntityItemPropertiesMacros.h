@@ -492,6 +492,9 @@ public:                                      \
         _##n = value;                        \
         _##n##Changed = true;                \
     }                                        \
+    void _set##N(const T& value) {           \
+        _##n = value;                        \
+    }                                        \
     DEFINE_CORE(N, n, T, V)
 
 #define DEFINE_PROPERTY_REF_WITH_SETTER(P, N, n, T, V) \

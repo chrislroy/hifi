@@ -3029,9 +3029,14 @@ void Application::onDesktopRootContextCreated(QQmlContext* surfaceContext) {
     _window->setMenuBar(new Menu());
 }
 
-void Application::updateSceneModel(const EntityItemPointer& entity, EntityTree::FilterType action)
+void Application::updateSceneModel(QUuid entityID, int action)
 {  
-    _model->refresh(entity, action);
+    _model->refresh(entityID, action);
+
+    // HACK since using  beginResetModel() and endResetModel() does not refresh...
+    auto surfaceContext = DependencyManager::get<OffscreenUi>()->getSurfaceContext();
+    surfaceContext->setContextProperty("sceneGraph", _model);
+    // END OF HACK
  }
 
 void Application::onDesktopRootItemCreated(QQuickItem* rootItem) {

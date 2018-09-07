@@ -88,10 +88,6 @@ EntityTree::EntityTree(bool shouldReaverage) : Octree(shouldReaverage) {
     resetClientEditStats();
 
     EntityItem::retrieveMarketplacePublicKey();
-
-    _nameManager = new SceneChangeListener(_entityMap);
-    connect(this, &EntityTree::updateEntityName, _nameManager, &SceneChangeListener::generateEntityName, Qt::QueuedConnection);
-    connect(this, &EntityTree::addingEntity, _nameManager, &SceneChangeListener::generateEntityName, Qt::QueuedConnection);
 }
 
 EntityTree::~EntityTree() {
@@ -303,8 +299,10 @@ void EntityTree::postAddEntity(EntityItemPointer entity) {
     // find and hook up any entities with this entity as a (previously) missing parent
     fixupNeedsParentFixups();
 
+    entity->setName(generateEntityName(entity->getEntityItemID()));
+
     emit addingEntity(entity->getEntityItemID());
-    emit updateSceneModel(entity, Add);
+    emit updateSceneModel(entity->getEntityItemID(), Add);
 }
 
 bool EntityTree::updateEntity(const EntityItemID& entityID,
@@ -450,8 +448,9 @@ bool EntityTree::updateEntity(EntityItemPointer entity,
         // else client accepts what the server says
 
         if (properties.needToUpdateModel()) {
-            emit updateEntityName(entity->getEntityItemID());
-            emit updateSceneModel(entity, Add);
+            // CROY - bypass property change
+            entity->setName(generateEntityName(entity->getEntityItemID()));
+            emit updateSceneModel(entity->getEntityItemID(), Edit);
         }
 
         QString entityScriptBefore = entity->getScript();
@@ -644,7 +643,7 @@ void EntityTree::deleteEntity(const EntityItemID& entityID, bool force, bool ign
     unhookChildAvatar(entityID);
     emit deletingEntity(entityID);
     emit deletingEntityPointer(existingEntity.get());
-    emit updateSceneModel(existingEntity, Delete);
+    emit updateSceneModel(entityID, Delete);
 
     // NOTE: callers must lock the tree before using this method
     DeleteEntityOperator theOperator(getThisPointer(), entityID);
@@ -1753,6 +1752,7 @@ int EntityTree::processEditPacketData(ReceivedMessage& message,
                         // this is a new entity... assign a new entityID
                         properties.setCreated(properties.getLastEdited());
                         properties.setLastEditedBy(senderNode->getUUID());
+
                         startCreate = usecTimestampNow();
                         EntityItemPointer newEntity = addEntity(entityItemID, properties);
                         endCreate = usecTimestampNow();
@@ -2744,18 +2744,23 @@ bool EntityTree::removeMaterialFromOverlay(const QUuid& overlayID,
 // so box-1 and box-2 are valid
 // when reparenting an entity - the index is removed from the name and regenerated
 // so box-1 becomes box which becomes box-xxx where xxx is the first index not present under that entity
-void SceneChangeListener::generateEntityName(const EntityItemID& entityID) {
+QString EntityTree::generateEntityName(const EntityItemID& entityID) const {
     // qDebug() << "SceneGraph::generateEntityName";
 
-    auto entity = _entityMap.value(entityID);
+    QHash<EntityItemID, EntityItemPointer> localMap(_entityMap);
+
+    EntityItemPointer entity = nullptr;
+    if (localMap.contains(entityID))
+        entity = localMap.value(entityID);
+    if (entity == nullptr)
+        return QString();
 
     // start with suggested name - current one of type name
     auto suggestedName = QString();
     if (!entity->getName().isEmpty()) {
         suggestedName = entity->getName();
-
     } else {
-        if (_entityMap.count() == 1)
+        if (localMap.count() == 1)
             suggestedName = "Stage";
         else
             suggestedName = EntityTypes::getEntityTypeName(entity->getType());
@@ -2766,7 +2771,6 @@ void SceneChangeListener::generateEntityName(const EntityItemID& entityID) {
 
     // collect all children names
     QStringList childrenNames;
-    QHash<EntityItemID, EntityItemPointer> localMap(_entityMap);
 
     if (parentId.isNull()) {
         QHash<EntityItemID, EntityItemPointer>::const_iterator itr;
@@ -2792,5 +2796,5 @@ void SceneChangeListener::generateEntityName(const EntityItemID& entityID) {
         testName = QString("%1-%2").arg(suggestedName.section('-', 0, 0)).arg(index++);
     }
     // qDebug() << "-------------- Renaming entity from <" << qPrintable(suggestedName) << " to " << qPrintable(testName);
-    entity->setName(testName);
+    return testName;
 }

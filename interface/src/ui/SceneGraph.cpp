@@ -9,10 +9,11 @@ SceneGraph::SceneGraph(const EntityTreePointer treePointer, QObject* parent)
     : _treePointer(treePointer)
     , _rootItem(nullptr)
 {
-    m_roleNameMapping[TreeModelRoleName] = "name";
-    m_roleNameMapping[TreeModelRoleDescription] = "type";
+    m_roleNameMapping[NodeRoleName] = "name";
+    m_roleNameMapping[NodeRoleID] = "id";
+    m_roleNameMapping[NodeRoleType] = "type";
 
-    setupModelData(nullptr, EntityTree::Add);
+    setupModelData(QUuid(), EntityTree::Add);
 }
 
 SceneGraph::~SceneGraph() {
@@ -30,7 +31,7 @@ QVariant SceneGraph::data(const QModelIndex& index, int role) const {
     if (!index.isValid())
         return QVariant();
 
-    if (role != TreeModelRoleName && role != TreeModelRoleDescription)
+    if (role != NodeRoleName && role != NodeRoleID && role != NodeRoleType)
         return QVariant();
 
     SceneNode* item = static_cast<SceneNode*>(index.internalPointer());
@@ -101,35 +102,31 @@ int SceneGraph::rowCount(const QModelIndex& parent) const {
 }
 
 
-void SceneGraph::setupModelData(const EntityItemPointer& entity, EntityTree::FilterType action)
+void SceneGraph::setupModelData(QUuid entityID, int action)
 {
-    QList<int> indentations;
-    indentations << 0;
-
     beginResetModel();
 
-    int number = 0;
+    QHash<EntityItemID, EntityItemPointer> treeMap = _treePointer->getTreeMap();
 
     // TODO - delete all nodes - but we need to better manage the nodes
-    if (entity == nullptr) { // id is null - we are starting the process - trash everything
+    if (true || entityID.isNull() || treeMap.contains(entityID)) { // id is null - we are starting the process - trash everything
         // delete exiting rootItem
         if (_rootItem!=nullptr)
             delete _rootItem;
 
         // create new root item
         QList<QVariant> rootData;
-
-        rootData << "Name"
-                 << "Type";
+        rootData << "Name";
+        rootData << "Type";
+        rootData << "ID";
         _rootItem = new SceneNode(rootData);
 
         // clear node map
         _nodeMap.clear();
 
         // regenerate model and populate node map
-        const QHash<EntityItemID, EntityItemPointer> treeMap = _treePointer->getTreeMap();
-
-        for (auto itr = treeMap.constBegin(); itr != treeMap.constEnd(); ++itr) {
+        QHash<EntityItemID, EntityItemPointer>::iterator itr = treeMap.begin();
+        while (!treeMap.empty()) {
             const EntityItemPointer& entityItem = itr.value();
             auto name = entityItem->getName();
             auto type = EntityTypes::getEntityTypeName(entityItem->getType());
@@ -139,63 +136,93 @@ void SceneGraph::setupModelData(const EntityItemPointer& entity, EntityTree::Fil
             QList<QVariant> columnData;
             columnData << name;
             columnData << type;
+            columnData << id.toString();;
 
+            bool added = false;
             if (parentId.isNull()) {
-                qDebug() << "adding to root";
                 auto node = new SceneNode(columnData, _rootItem);
                 _rootItem->appendChild(node);
                 _nodeMap[id] = node;
-            } else {
+                added = true;
+            }
+            else {
+                auto parent = _nodeMap[parentId];
+                if (parent != nullptr) {
+                    auto node = new SceneNode(columnData, parent);
+                    parent->appendChild(node);
+                    _nodeMap[id] = node;
+                    added = true;
+                }
+            }
+
+            if (added) {
+                itr = treeMap.erase(itr);
+            }
+            else {
+                ++itr;
+            }
+            if (itr == treeMap.end())
+                itr = treeMap.begin();
+        }
+
+    }
+    else {
+
+        auto entity = treeMap[entityID];
+
+        auto name = entity->getName();
+        auto type = EntityTypes::getEntityTypeName(entity->getType());
+        auto id = entity->getID();
+        auto parentId = entity->getParentID();
+
+        QList<QVariant> columnData;
+        columnData << id.toString();
+        columnData << type;
+
+        if (action == EntityTree::Add) {
+            // add to root
+            if (parentId.isNull()) {
+                auto node = new SceneNode(columnData, _rootItem);
+                _rootItem->appendChild(node);
+                _nodeMap[id] = node;
+            }
+            // add to existing parent
+            else {
+                qDebug() << "WARNING - add to existing parent - this should not happens";
                 auto parent = _nodeMap[parentId];
                 auto node = new SceneNode(columnData, parent);
                 parent->appendChild(node);
                 _nodeMap[id] = node;
             }
         }
-        return;
-    }
+        else if (action == EntityTree::Delete) {
+            auto node = _nodeMap.find(id);
+            delete _nodeMap[id];
+            _nodeMap.erase(node);
+        }
+        else if (action == EntityTree::Edit) {
+            // parent changed???
+            //auto node = _nodeMap[id];
+            //QUuid oldParentId = node->parentItem()->data(0);
+            //auto oldParent = _nodeMap[oldParentId];
 
-    auto name = entity->getName();
-    auto type = EntityTypes::getEntityTypeName(entity->getType());
-    auto id = entity->getID();
-    auto parentId = entity->getParentID();
-
-    QList<QVariant> columnData;
-    columnData << name;
-    columnData << type;
-
-    if (action == EntityTree::Add) {
-
-        if (parentId.isNull()) {
-            auto node = new SceneNode(columnData, _rootItem);
-            _rootItem->appendChild(node);
-            _nodeMap[id] = node;
-        } else {
-            auto parent = _nodeMap[parentId];
-            auto node = new SceneNode(columnData, parent);
-            parent->appendChild(node);
-            _nodeMap[id] = node;
+            //auto parentEntity = treeMap[node->parentItem()->data(0)];
+            //auto origParentId = node->parentItem()->data(0);
+            //auto origParentType = node->parentItem()->data(1);
+            qDebug() << "TODO --- Updating entity name or parent";
+        }
+        else {
+            qDebug("**** invalid action!!!!");
         }
     }
-    else if (action == EntityTree::Edit) {
-        auto node = _nodeMap[id];
-        node->setData(columnData); // TODO - fix for parent change 
-    }
-    else if (action == EntityTree::Delete) {
-        auto node = _nodeMap.find(id);
-        delete _nodeMap[id];
-        _nodeMap.erase(node);
-    }
-    else {
-        qDebug("**** invalid action!!!!");
-    }
+    //emit dataChanged(createIndex(0, 0), createIndex(rowCount(), 1));
 
     endResetModel();
 }
 
-void SceneGraph::refresh(const EntityItemPointer& entity, EntityTree::FilterType action)
+void SceneGraph::refresh(QUuid entityId, int action)
 {
     qDebug() << "SceneGraph::refresh()";
 
-    setupModelData(entity, action);
+    setupModelData(entityId, action);
 }

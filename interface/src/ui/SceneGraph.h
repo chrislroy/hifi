@@ -12,10 +12,11 @@ class SceneGraph : public QAbstractItemModel {
     Q_OBJECT
 
 public:
-    enum TreeModelRoles
+    enum NodeRole
     {
-        TreeModelRoleName = Qt::UserRole + 1,
-        TreeModelRoleDescription
+        NodeRoleName = Qt::UserRole + 1,
+        NodeRoleType,
+        NodeRoleID
     };
 
     SceneGraph(const EntityTreePointer treePointer = nullptr, QObject* parent = 0);
@@ -30,9 +31,9 @@ public:
     int columnCount(const QModelIndex& parent = QModelIndex()) const Q_DECL_OVERRIDE;
     QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;
 
-    void refresh(const EntityItemPointer&, EntityTree::FilterType);
+    void refresh(QUuid, int);
 private:
-    void setupModelData(const EntityItemPointer& entity, EntityTree::FilterType action);
+    void setupModelData(QUuid, int);
 
     SceneNode* _rootItem;
     QHash<int, QByteArray> m_roleNameMapping;
