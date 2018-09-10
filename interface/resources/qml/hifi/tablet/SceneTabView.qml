@@ -74,6 +74,9 @@ TabBar {
                     TreeView {
                         anchors.fill: parent
                         model: sceneGraph
+                        alternatingRowColors: false
+                        backgroundVisible: false
+                        headerVisible: false
                         itemDelegate: TreeDelegate {}
 
                         TableViewColumn {
