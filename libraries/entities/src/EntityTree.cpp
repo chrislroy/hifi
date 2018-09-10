@@ -2761,9 +2761,8 @@ QString EntityTree::generateEntityName(const EntityItemID& entityID) const {
         suggestedName = entity->getName();
     } else {
         if (localMap.count() == 1)
-            suggestedName = "Stage";
-        else
-            suggestedName = EntityTypes::getEntityTypeName(entity->getType());
+            return "_Stage_";
+        suggestedName = EntityTypes::getEntityTypeName(entity->getType());
     }
 
     // check if parent.. if not - return suggested name
