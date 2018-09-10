@@ -83,14 +83,14 @@ TabBar {
                             title: "Name"
                             role: "name"
                         }
-                        TableViewColumn {
-                            title: "Type"
-                            role: "type"
-                        }
-                        TableViewColumn {
-                            title: "Id"
-                            role: "id"
-                        }
+//                       TableViewColumn {
+//                           title: "Type"
+//                           role: "type"
+//                       }
+//                       TableViewColumn {
+//                           title: "Id"
+//                           role: "id"
+//                       }
 
                     }
                 } // Flickable

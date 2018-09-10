@@ -2744,6 +2744,8 @@ bool EntityTree::removeMaterialFromOverlay(const QUuid& overlayID,
 // so box-1 and box-2 are valid
 // when reparenting an entity - the index is removed from the name and regenerated
 // so box-1 becomes box which becomes box-xxx where xxx is the first index not present under that entity
+const QString STAGE_NAME = "_Stage_";
+
 QString EntityTree::generateEntityName(const EntityItemID& entityID) const {
     // qDebug() << "SceneGraph::generateEntityName";
 
@@ -2761,9 +2763,12 @@ QString EntityTree::generateEntityName(const EntityItemID& entityID) const {
         suggestedName = entity->getName();
     } else {
         if (localMap.count() == 1)
-            return "_Stage_";
-        suggestedName = EntityTypes::getEntityTypeName(entity->getType());
+            suggestedName = STAGE_NAME;
+        else
+            suggestedName = EntityTypes::getEntityTypeName(entity->getType());
     }
+    if (suggestedName == STAGE_NAME)
+        return suggestedName;
 
     // check if parent.. if not - return suggested name
     auto parentId = entity->getParentID();

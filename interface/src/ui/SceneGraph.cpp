@@ -10,8 +10,8 @@ SceneGraph::SceneGraph(const EntityTreePointer treePointer, QObject* parent)
     , _rootItem(nullptr)
 {
     m_roleNameMapping[NodeRoleName] = "name";
-    m_roleNameMapping[NodeRoleID] = "id";
-    m_roleNameMapping[NodeRoleType] = "type";
+    //m_roleNameMapping[NodeRoleID] = "id";
+    //m_roleNameMapping[NodeRoleType] = "type";
 
     setupModelData(QUuid(), EntityTree::Add);
 }
