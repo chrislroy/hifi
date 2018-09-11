@@ -3024,6 +3024,8 @@ void Application::onDesktopRootContextCreated(QQmlContext* surfaceContext) {
         surfaceContext->setContextProperty("Steam", new SteamScriptingInterface(engine, steamClient.get()));
     }
 
+    EntityTreePointer tree = getEntities()->getTree();
+    _model = new SceneGraph(engine);
     surfaceContext->setContextProperty("sceneGraph", _model);
 
     _window->setMenuBar(new Menu());
@@ -3031,12 +3033,8 @@ void Application::onDesktopRootContextCreated(QQmlContext* surfaceContext) {
 
 void Application::updateSceneModel(QUuid entityID, int action)
 {  
+    Q_ASSERT(_model != nullptr);
     _model->refresh(entityID, action);
-
-    // HACK since using  beginResetModel() and endResetModel() does not refresh...
-    auto surfaceContext = DependencyManager::get<OffscreenUi>()->getSurfaceContext();
-    surfaceContext->setContextProperty("sceneGraph", _model);
-    // END OF HACK
  }
 
 void Application::onDesktopRootItemCreated(QQuickItem* rootItem) {
@@ -4948,8 +4946,8 @@ void Application::init() {
             },
             Qt::QueuedConnection);
 
-
-    _model = new SceneGraph(tree);
+    //auto engine = surfaceContext->engine();
+    _model->initialize(tree);
 
     connect(tree.get(), &EntityTree::updateSceneModel, this, &Application::updateSceneModel);
 
@@ -6256,6 +6254,8 @@ void Application::clearDomainOctreeDetails() {
 
     // reset the model renderer
     getEntities()->clear();
+
+    _model->initialize(getEntities()->getTree());
 
     auto skyStage = DependencyManager::get<SceneScriptingInterface>()->getSkyStage();
 

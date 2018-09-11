@@ -2747,13 +2747,11 @@ bool EntityTree::removeMaterialFromOverlay(const QUuid& overlayID,
 const QString STAGE_NAME = "_Stage_";
 
 QString EntityTree::generateEntityName(const EntityItemID& entityID) const {
-    // qDebug() << "SceneGraph::generateEntityName";
-
-    QHash<EntityItemID, EntityItemPointer> localMap(_entityMap);
+    QWriteLocker locker(&_entityMapLock);
 
     EntityItemPointer entity = nullptr;
-    if (localMap.contains(entityID))
-        entity = localMap.value(entityID);
+    if (_entityMap.contains(entityID))
+        entity = _entityMap.value(entityID);
     if (entity == nullptr)
         return QString();
 
@@ -2762,7 +2760,7 @@ QString EntityTree::generateEntityName(const EntityItemID& entityID) const {
     if (!entity->getName().isEmpty()) {
         suggestedName = entity->getName();
     } else {
-        if (localMap.count() == 1)
+        if (_entityMap.count() == 1)
             suggestedName = STAGE_NAME;
         else
             suggestedName = EntityTypes::getEntityTypeName(entity->getType());
@@ -2778,20 +2776,23 @@ QString EntityTree::generateEntityName(const EntityItemID& entityID) const {
 
     if (parentId.isNull()) {
         QHash<EntityItemID, EntityItemPointer>::const_iterator itr;
-        for (itr = localMap.constBegin(); itr != localMap.constEnd(); ++itr) {
+        for (itr = _entityMap.constBegin(); itr != _entityMap.constEnd(); ++itr) {
             const EntityItemPointer& entityItem = itr.value();
             if (entityItem->getID() != entity->getID())
                 childrenNames.append(entityItem->getName());
         }
-    } else {
+    } else if (_entityMap.contains(parentId)) {
         // get parent
-        auto parentEntity = localMap.value(parentId);
-
+        qDebug() << "updating child name for parent: " << parentId;
+        auto parentEntity = _entityMap.value(parentId);
         parentEntity->forEachChild([&](SpatiallyNestablePointer child) {
             if (child->getNestableType() == NestableType::Entity && child->getID() != entity->getID()) {
                 childrenNames.append(child->getName());
             }
         });
+    }
+    else {
+        qDebug() << "parent node not in map: " << parentId;
     }
 
     auto testName = suggestedName;

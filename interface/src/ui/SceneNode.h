@@ -22,6 +22,8 @@ public:
     int row() const;
     SceneNode* parentItem();
 
+    void deleteAllChildren();
+
 private:
     QList<SceneNode*> m_childItems;
     QList<QVariant> m_itemData;

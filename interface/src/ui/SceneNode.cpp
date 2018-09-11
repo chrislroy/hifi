@@ -58,4 +58,13 @@ int SceneNode::row() const
     return 0;
 }
 
+void SceneNode::deleteAllChildren()
+{
+    auto it = m_childItems.begin();
+    while (it != m_childItems.end()) {
+        delete (*it);
+        it = m_childItems.erase(it);
+    }
+}
+
 

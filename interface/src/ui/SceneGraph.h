@@ -16,12 +16,13 @@ public:
     {
         NodeRoleName = Qt::UserRole + 1,
         NodeRoleType,
-        NodeRoleID
+        NodeRoleID,
+        NodeRoleParentID
     };
 
-    SceneGraph(const EntityTreePointer treePointer = nullptr, QObject* parent = 0);
+    SceneGraph(QObject* parent = 0);
     ~SceneGraph();
-
+    void initialize(const EntityTreePointer treePointer);
     QVariant data(const QModelIndex& index, int role) const Q_DECL_OVERRIDE;
     Qt::ItemFlags flags(const QModelIndex& index) const Q_DECL_OVERRIDE;
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
@@ -35,11 +36,12 @@ public:
 private:
     void setupModelData(QUuid, int);
 
-    SceneNode* _rootItem;
+    SceneNode* _rootItem = { nullptr };
+    EntityTreePointer _treePointer = { nullptr };
+
     QHash<int, QByteArray> m_roleNameMapping;
     QHash<QUuid, SceneNode*> _nodeMap;
 
-    const EntityTreePointer _treePointer;
 };
 
 #endif  // SCENEGRAPH_H
