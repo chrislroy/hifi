@@ -2744,7 +2744,6 @@ bool EntityTree::removeMaterialFromOverlay(const QUuid& overlayID,
 // so box-1 and box-2 are valid
 // when reparenting an entity - the index is removed from the name and regenerated
 // so box-1 becomes box which becomes box-xxx where xxx is the first index not present under that entity
-const QString STAGE_NAME = "_Stage_";
 
 QString EntityTree::generateEntityName(const EntityItemID& entityID) const {
     QWriteLocker locker(&_entityMapLock);
@@ -2760,13 +2759,8 @@ QString EntityTree::generateEntityName(const EntityItemID& entityID) const {
     if (!entity->getName().isEmpty()) {
         suggestedName = entity->getName();
     } else {
-        if (_entityMap.count() == 1)
-            suggestedName = STAGE_NAME;
-        else
-            suggestedName = EntityTypes::getEntityTypeName(entity->getType());
+        suggestedName = EntityTypes::getEntityTypeName(entity->getType());
     }
-    if (suggestedName == STAGE_NAME)
-        return suggestedName;
 
     // check if parent.. if not - return suggested name
     auto parentId = entity->getParentID();
@@ -2783,7 +2777,6 @@ QString EntityTree::generateEntityName(const EntityItemID& entityID) const {
         }
     } else if (_entityMap.contains(parentId)) {
         // get parent
-        qDebug() << "updating child name for parent: " << parentId;
         auto parentEntity = _entityMap.value(parentId);
         parentEntity->forEachChild([&](SpatiallyNestablePointer child) {
             if (child->getNestableType() == NestableType::Entity && child->getID() != entity->getID()) {
@@ -2800,6 +2793,5 @@ QString EntityTree::generateEntityName(const EntityItemID& entityID) const {
     while (childrenNames.contains(testName)) {
         testName = QString("%1-%2").arg(suggestedName.section('-', 0, 0)).arg(index++);
     }
-    // qDebug() << "-------------- Renaming entity from <" << qPrintable(suggestedName) << " to " << qPrintable(testName);
     return testName;
 }
