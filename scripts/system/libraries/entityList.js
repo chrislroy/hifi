@@ -11,6 +11,22 @@
 /* global EntityListTool, Tablet, selectionManager, Entities, Camera, MyAvatar, Vec3, Menu, Messages,
    cameraManager, MENU_EASE_ON_FOCUS, deleteSelectedEntities, toggleSelectedEntitiesLocked, toggleSelectedEntitiesVisible */
 
+var PROFILING_ENABLED = false;
+var profileIndent = '';
+const PROFILE_NOOP = function(_name, fn, args) {
+    fn.apply(this, args);
+} ;
+PROFILE = !PROFILING_ENABLED ? PROFILE_NOOP : function(name, fn, args) {
+    console.log("PROFILE-Script " + profileIndent + "(" + name + ") Begin");
+    var previousIndent = profileIndent;
+    profileIndent += '  ';
+    var before = Date.now();
+    fn.apply(this, args);
+    var delta = Date.now() - before;
+    profileIndent = previousIndent;
+    console.log("PROFILE-Script " + profileIndent + "(" + name + ") End " + delta + "ms");
+};
+
 EntityListTool = function(shouldUseEditTabletApp) {
     var that = {};
 
@@ -66,13 +82,18 @@ EntityListTool = function(shouldUseEditTabletApp) {
     that.setVisible(false);
 
     function emitJSONScriptEvent(data) {
-        var dataString = JSON.stringify(data);
+        var dataString;
+        PROFILE("Script-JSON.stringify", function() {
+            dataString = JSON.stringify(data);
+        });
+        PROFILE("Script-emitScriptEvent", function() {
         webView.emitScriptEvent(dataString);
         if (entityListWindow.window) {
             entityListWindow.window.emitScriptEvent(dataString);
         }
+        });
     }
-    
+
     that.toggleVisible = function() {
         that.setVisible(!visible);
     };
@@ -103,7 +124,7 @@ EntityListTool = function(shouldUseEditTabletApp) {
             selectedIDs: selectedIDs
         });
     };
-    
+
     that.deleteEntities = function (deletedIDs) {
         emitJSONScriptEvent({
             type: "deleted",
@@ -116,19 +137,24 @@ EntityListTool = function(shouldUseEditTabletApp) {
     }
 
     that.sendUpdate = function() {
+        PROFILE('Script-sendUpdate', function() {
         var entities = [];
 
         var ids;
+            PROFILE("findEntities", function() {
         if (filterInView) {
             ids = Entities.findEntitiesInFrustum(Camera.frustum);
         } else {
             ids = Entities.findEntities(MyAvatar.position, searchRadius);
         }
+            });
 
         var cameraPosition = Camera.position;
+            PROFILE("getProperties", function() {
         for (var i = 0; i < ids.length; i++) {
             var id = ids[i];
-            var properties = Entities.getEntityProperties(id);
+                    var properties = Entities.getEntityProperties(id, ['name', 'type', 'locked',
+                        'visible', 'renderInfo', 'type', 'modelURL', 'materialURL', 'script']);
 
             if (!filterInView || Vec3.distance(properties.position, cameraPosition) <= searchRadius) {
                 var url = "";
@@ -145,21 +171,22 @@ EntityListTool = function(shouldUseEditTabletApp) {
                     url: url,
                     locked: properties.locked,
                     visible: properties.visible,
-                    verticesCount: (properties.renderInfo !== undefined ? 
+                            verticesCount: (properties.renderInfo !== undefined ?
                         valueIfDefined(properties.renderInfo.verticesCount) : ""),
-                    texturesCount: (properties.renderInfo !== undefined ? 
+                            texturesCount: (properties.renderInfo !== undefined ?
                         valueIfDefined(properties.renderInfo.texturesCount) : ""),
-                    texturesSize: (properties.renderInfo !== undefined ? 
+                            texturesSize: (properties.renderInfo !== undefined ?
                         valueIfDefined(properties.renderInfo.texturesSize) : ""),
-                    hasTransparent: (properties.renderInfo !== undefined ? 
+                            hasTransparent: (properties.renderInfo !== undefined ?
                         valueIfDefined(properties.renderInfo.hasTransparent) : ""),
                     isBaked: properties.type === "Model" ? url.toLowerCase().endsWith(".baked.fbx") : false,
-                    drawCalls: (properties.renderInfo !== undefined ? 
+                            drawCalls: (properties.renderInfo !== undefined ?
                         valueIfDefined(properties.renderInfo.drawCalls) : ""),
                     hasScript: properties.script !== ""
                 });
             }
         }
+            });
 
         var selectedIDs = [];
         for (var j = 0; j < selectionManager.selections.length; j++) {
@@ -170,6 +197,7 @@ EntityListTool = function(shouldUseEditTabletApp) {
             type: "update",
             entities: entities,
             selectedIDs: selectedIDs,
+        });
         });
     };
 
