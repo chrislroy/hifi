@@ -31,6 +31,8 @@
 #include "MyAvatar.h"
 #include "OtherAvatar.h"
 
+using SortedAvatar = std::pair<float, std::shared_ptr<Avatar>>;
+
 /**jsdoc 
  * The AvatarManager API has properties and methods which manage Avatars within the same domain.
  *
@@ -89,9 +91,11 @@ public:
     void updateOtherAvatars(float deltaTime);
     void sendIdentityRequest(const QUuid& avatarID) const;
 
+    void setMyAvatarDataPacketsPaused(bool puase);
+
     void postUpdate(float deltaTime, const render::ScenePointer& scene);
 
-    void clearOtherAvatars();
+    void clearOtherAvatars() override;
     void deleteAllAvatars();
 
     void getObjectsToRemoveFromPhysics(VectorOfMotionStates& motionStates);
@@ -217,6 +221,7 @@ private:
     int _numAvatarsNotUpdated { 0 };
     float _avatarSimulationTime { 0.0f };
     bool _shouldRender { true };
+    bool _myAvatarDataPacketsPaused { false };
     mutable int _identityRequestsSent { 0 };
 
     mutable std::mutex _spaceLock;
