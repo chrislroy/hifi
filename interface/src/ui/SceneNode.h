@@ -9,20 +9,22 @@
 //! [0]
 class SceneNode {
 public:
-    explicit SceneNode(const QList<QVariant>& data, SceneNode* parentItem = 0);
+    explicit SceneNode(const QList<QVariant>& data, SceneNode* parent = 0);
     ~SceneNode();
 
+    void setParent(SceneNode* parent);
     void appendChild(SceneNode* child);
-
+    void removeChild(SceneNode* child);
     SceneNode* child(int row);
     int childCount() const;
     int columnCount() const;
     QVariant data(int column) const;
-    void setData(const QList<QVariant>& data);
+    void updateData(int column, const QVariant& data);
     int row() const;
-    SceneNode* parentItem();
+    SceneNode* parentNode();
 
     void deleteAllChildren();
+    QList<SceneNode*> takeChildren();
 
 private:
     QList<SceneNode*> m_childItems;

@@ -15,15 +15,36 @@ SceneNode::SceneNode(const QList<QVariant> &data, SceneNode *parent)
     m_itemData = data;
 }
 
+
 SceneNode::~SceneNode()
 {
     qDeleteAll(m_childItems);
 }
 
+QList<SceneNode*> SceneNode::takeChildren()
+{
+    auto cacheChildren = m_childItems;
+    m_childItems.clear();
+    return cacheChildren;
+}
+
+void SceneNode::setParent(SceneNode* parent)
+{
+    m_parentItem = parent;
+}
+
 void SceneNode::appendChild(SceneNode *item)
 {
     m_childItems.append(item);
+    item->setParent(this);
 }
+
+void SceneNode::removeChild(SceneNode* child)
+{
+    int i = m_childItems.indexOf(child);
+    m_childItems.removeAt(i);
+}
+
 
 SceneNode *SceneNode::child(int row)
 {
@@ -45,7 +66,12 @@ QVariant SceneNode::data(int column) const
     return m_itemData.value(column);
 }
 
-SceneNode *SceneNode::parentItem()
+void SceneNode::updateData(int column, const QVariant& data)
+{
+    m_itemData[column] = data;
+}
+
+SceneNode *SceneNode::parentNode()
 {
     return m_parentItem;
 }

@@ -55,7 +55,16 @@ public:
         Physics,
         Delete
     };
-    Q_ENUM(FilterType)
+
+    enum SceneAction
+    {
+        InitializeAction,
+        AddElementAction,
+        EditElementAction,
+        DeleteElementAction,
+    };
+    Q_ENUM(SceneAction)
+
     EntityTree(bool shouldReaverage = false);
     virtual ~EntityTree();
 
@@ -500,6 +509,7 @@ private:
 
     bool _serverlessDomain{ false };
 
+    bool _enableUpdate = { true };
     std::map<QString, QString> _namedPaths;
 };
 

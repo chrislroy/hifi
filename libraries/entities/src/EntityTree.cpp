@@ -141,6 +141,9 @@ void EntityTree::eraseAllOctreeElements(bool createNewRoot) {
 void EntityTree::readBitstreamToTree(const unsigned char* bitstream,
                                      uint64_t bufferSizeBytes,
                                      ReadBitstreamToTreeParams& args) {
+
+    _enableUpdate = false;
+
     Octree::readBitstreamToTree(bitstream, bufferSizeBytes, args);
 
     // add entities
@@ -159,6 +162,10 @@ void EntityTree::readBitstreamToTree(const unsigned char* bitstream,
         recurseTreeWithOperator(&_entityMover);
         _entityMover.reset();
     }
+
+    _enableUpdate = true;
+    emit updateSceneModel(QUuid(), InitializeAction);
+
 }
 
 int EntityTree::readEntityDataFromBuffer(const unsigned char* data, int bytesLeftToRead, ReadBitstreamToTreeParams& args) {
@@ -303,7 +310,8 @@ void EntityTree::postAddEntity(EntityItemPointer entity) {
     entity->setName(generateEntityName(entity->getEntityItemID()));
 
     emit addingEntity(entity->getEntityItemID());
-    emit updateSceneModel(entity->getEntityItemID(), Add);
+    if (_enableUpdate)
+        emit updateSceneModel(entity->getEntityItemID(), AddElementAction);
 }
 
 bool EntityTree::updateEntity(const EntityItemID& entityID,
@@ -451,7 +459,8 @@ bool EntityTree::updateEntity(EntityItemPointer entity,
         if (properties.needToUpdateModel()) {
             // CROY - bypass property change
             entity->setName(generateEntityName(entity->getEntityItemID()));
-            emit updateSceneModel(entity->getEntityItemID(), Edit);
+            if (_enableUpdate)
+                emit updateSceneModel(entity->getEntityItemID(), EditElementAction);
         }
 
         QString entityScriptBefore = entity->getScript();
@@ -644,7 +653,8 @@ void EntityTree::deleteEntity(const EntityItemID& entityID, bool force, bool ign
     unhookChildAvatar(entityID);
     emit deletingEntity(entityID);
     emit deletingEntityPointer(existingEntity.get());
-    emit updateSceneModel(entityID, Delete);
+    if (_enableUpdate)
+        emit updateSceneModel(entityID, DeleteElementAction);
 
     // NOTE: callers must lock the tree before using this method
     DeleteEntityOperator theOperator(getThisPointer(), entityID);
