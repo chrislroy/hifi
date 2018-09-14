@@ -6,7 +6,7 @@ Item {
         color: "#afafaf"
         elide: styleData.elideMode
         text: styleData.value
-
+        //text: "Name: " + name + " - " + id
         font.family: "Fira Sans SemiBold"
         font.pixelSize: hifi.fontSizes.textFieldInput
         height: hifi.dimensions.tableRowHeight

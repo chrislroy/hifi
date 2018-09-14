@@ -7,8 +7,15 @@
 #include <QVariant>
 
 //! [0]
-class SceneNode {
+class SceneNode : public QObject
+{
+    Q_OBJECT
+
 public:
+
+    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
+    Q_PROPERTY(QString id READ id WRITE setId NOTIFY idChanged)
+
     explicit SceneNode(const QList<QVariant>& data, SceneNode* parent = 0);
     ~SceneNode();
 
@@ -25,8 +32,31 @@ public:
 
     void deleteAllChildren();
     QList<SceneNode*> takeChildren();
+    void setName(QString name)
+    {
+        m_name = name;
+        emit nameChanged(name);
+    }
+    QString name() const
+    {
+        return m_name;
+    }
 
+    void setId(QString id)
+    {
+        m_id = id;
+        emit idChanged(id);
+    }
+    QString id() const
+    {
+        return m_id;
+    }
+signals:
+    void nameChanged(QString);
+    void idChanged(QString);
 private:
+    QString m_name;
+    QString m_id;
     QList<SceneNode*> m_childItems;
     QList<QVariant> m_itemData;
     SceneNode* m_parentItem;
