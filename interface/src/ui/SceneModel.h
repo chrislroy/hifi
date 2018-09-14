@@ -1,6 +1,6 @@
 
-#ifndef SCENEGRAPH_H
-#define SCENEGRAPH_H
+#ifndef SCENEMODEL_H
+#define SCENEMODEL_H
 
 #include <QAbstractItemModel>
 #include "SceneNode.h"
@@ -8,7 +8,7 @@
 #include "EntityTree.h"
 #include "DependencyManager.h"
 
-class SceneGraph : public QAbstractItemModel {
+class SceneModel : public QAbstractItemModel {
     Q_OBJECT
 
 public:
@@ -20,8 +20,8 @@ public:
         NodeRoleParentID
     };
 
-    SceneGraph(QObject* parent = 0);
-    ~SceneGraph();
+    SceneModel(QObject* parent = 0);
+    ~SceneModel();
     void initialize(const EntityTreePointer treePointer);
     QVariant data(const QModelIndex& index, int role) const Q_DECL_OVERRIDE;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
@@ -45,4 +45,4 @@ private:
 
 };
 
-#endif  // SCENEGRAPH_H
+#endif  // SCENEMODEL_H

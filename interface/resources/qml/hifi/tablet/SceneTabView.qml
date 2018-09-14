@@ -1,6 +1,7 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.2
 import QtQuick.Controls 1.4
+import QtQuick.Controls.Styles 1.4
 import QtQml.Models 2.2
 import QtWebChannel 1.0
 
@@ -22,6 +23,7 @@ TabBar {
         readonly property int graph: 1
     }
 
+    signal sendToScript(var message);
     readonly property HifiConstants hifi: HifiConstants {}
 
     EditTabButton {
@@ -56,10 +58,7 @@ TabBar {
                     width: parent.width
                     clip: true
 
-                    contentHeight: createEntitiesFlow.height + importButton.height + assetServerButton.height +
-                                   header.anchors.topMargin + createEntitiesFlow.anchors.topMargin +
-                                   assetServerButton.anchors.topMargin + importButton.anchors.topMargin +
-                                   header.paintedHeight
+                    contentHeight: height
 
                     contentWidth: width
 
@@ -72,13 +71,34 @@ TabBar {
                     }
 
                     TreeView {
+                        id: treeView
                         anchors.fill: parent
-                        model: sceneGraph
+                        model: sceneModel
                         alternatingRowColors: false
                         backgroundVisible: false
                         headerVisible: false
                         itemDelegate: TreeDelegate {}
+                        selectionMode: SelectionMode.SingleSelection
+                        onClicked: {
+                            console.log('On clicked called', treeView.currentIndex)
+                            console.log('                 ', Object.keys(treeView.currentIndex))
+                            console.log('                 ', treeView.currentIndex.model)
+                            console.log('                 ', treeView.currentIndex.id)
+                            console.log('                 ', treeView.currentIndex.name)
 
+                            sceneTabView.sendToScript({ selection : treeView.currentIndex })
+                            if (index.parent.row >= 0) {
+                                console.log(index.parent.row, index.row)
+                                console.log(tests.data(index))
+                            }
+                        }
+                        // TODO - try this with images instead of Rectangle
+                        //style: TreeViewStyle {
+                        //    branchDelegate: Rectangle {
+                        //        width: 15; height: 15
+                        //        color: styleData.isExpanded ? "red" : "green"
+                        //    }
+                        //}
                         TableViewColumn {
                             title: "Name"
                             role: "name"

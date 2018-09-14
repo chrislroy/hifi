@@ -202,7 +202,7 @@
 #include "Util.h"
 #include "InterfaceParentFinder.h"
 #include "ui/OctreeStatsProvider.h"
-#include "ui/SceneGraph.h"              // new scene graph model
+#include "ui/SceneModel.h"              // new scene graph model
 
 #include <GPUIdent.h>
 #include <gl/GLHelpers.h>
@@ -2873,7 +2873,7 @@ void Application::initializeUi() {
     qmlRegisterType<Preference>("Hifi", 1, 0, "Preference");
     qmlRegisterType<WebBrowserSuggestionsEngine>("HifiWeb", 1, 0, "WebBrowserSuggestionsEngine");
 
-    qmlRegisterType<SceneGraph>("com.hewlett-packard.qmlcomponents", 1, 0, "SceneGraph");
+    qmlRegisterType<SceneModel>("com.hewlett-packard.qmlcomponents", 1, 0, "SceneModel");
 
     {
         auto tabletScriptingInterface = DependencyManager::get<TabletScriptingInterface>();
@@ -3080,8 +3080,8 @@ void Application::onDesktopRootContextCreated(QQmlContext* surfaceContext) {
     }
 
     EntityTreePointer tree = getEntities()->getTree();
-    _model = new SceneGraph(engine);
-    surfaceContext->setContextProperty("sceneGraph", _model);
+    _model = new SceneModel(engine);
+    surfaceContext->setContextProperty("sceneModel", _model);
 
     _window->setMenuBar(new Menu());
 }

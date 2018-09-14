@@ -87,7 +87,7 @@ class MainWindow;
 class AssetUpload;
 class CompositorHelper;
 class AudioInjector;
-class SceneGraph;
+class SceneModel;
 
 namespace controller {
     class StateController;
@@ -760,7 +760,7 @@ private:
     DisplayPluginPointer _autoSwitchDisplayModeSupportedHMDPlugin;
     QString _autoSwitchDisplayModeSupportedHMDPluginName;
 
-    SceneGraph* _model{ nullptr };
+    SceneModel* _model{ nullptr };
 
     bool _previousHMDWornStatus;
     void startHMDStandBySession();

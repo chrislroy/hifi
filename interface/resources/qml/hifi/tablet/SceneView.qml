@@ -20,6 +20,11 @@ StackView {
                                   "height": sceneView.availableHeight }
     Component.onCompleted: {
         tab.currentIndex = 0
+        tab.sendToScript.connect(junk)
+    }
+
+    function junk(data) {
+        console.log('function junk called')
     }
 
     background: Rectangle {
@@ -49,7 +54,7 @@ StackView {
     // Passes script messages to the item on the top of the stack
     function fromScript(message) {
 
-        var currentItem = sceneGraph.currentItem;
+        var currentItem = sceneModel.currentItem;
         if (currentItem && currentItem.fromScript) {
             currentItem.fromScript(message);
         } else if (tab.fromScript) {
