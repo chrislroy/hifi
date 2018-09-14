@@ -119,9 +119,6 @@ void InteractiveWindow::sendToQml(const QVariant& message) {
 }
 
 void InteractiveWindow::emitScriptEvent(const QVariant& scriptMessage) {
-
-    if (getTitle().contains("Create Tools"))
-        qDebug() << "InteractiveWindow::emitScriptEvent" << qPrintable(scriptMessage.toString());
     if (QThread::currentThread() != thread()) {
         QMetaObject::invokeMethod(this, "emitScriptEvent", Qt::QueuedConnection, Q_ARG(QVariant, scriptMessage));
     } else {

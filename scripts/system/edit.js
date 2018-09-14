@@ -30,7 +30,7 @@ Script.include([
     "libraries/ToolTip.js",
     "libraries/entityCameraTool.js",
     "libraries/gridTool.js",
-    "libraries/entityList.js", // required???
+    "libraries/entityList.js",
     "libraries/utils.js",
     "particle_explorer/particleExplorerTool.js",
     "libraries/entityIconOverlayManager.js"
