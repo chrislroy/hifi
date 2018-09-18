@@ -273,3 +273,8 @@ void SceneModel::refresh(QUuid entityId, int action) {
 
     setupModelData(entityId, action);
 }
+
+int SceneModel::getRoleKey(QString rolename) const
+{
+    return roleNames().key(rolename.toLatin1());
+}

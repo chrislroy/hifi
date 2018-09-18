@@ -58,8 +58,11 @@ EntityListTool = function(shouldUseEditTabletApp) {
         false
     );
 
+    createToolsWindow.fromQml.addListener(fromQml);
+
     var webView = null;
     webView = Tablet.getTablet("com.highfidelity.interface.tablet.system");
+    webView.fromQml.connect(fromQml);
     webView.setVisible = function(value){ };
 
     var filterInView = false;
@@ -80,6 +83,16 @@ EntityListTool = function(shouldUseEditTabletApp) {
     };
 
     that.setVisible(false);
+
+    function updateSelectionFromGraph(data) {
+
+        console.log('Item selected: ', data.selection);
+
+        var selectedIDs = [];
+        selectedIDs.push(data.selection);
+
+        selectionManager.setSelections(selectedIDs);
+    }
 
     function emitJSONScriptEvent(data) {
         var dataString;
@@ -215,7 +228,7 @@ EntityListTool = function(shouldUseEditTabletApp) {
         try {
             data = JSON.parse(data);
 
-            //console.log("**** CROY **** onWebEventReceived " + JSON.stringify(data));
+            console.log("**** CROY **** onWebEventReceived " + JSON.stringify(data));
 
         } catch(e) {
             print("entityList.js: Error parsing JSON: " + e.name + " data " + data);
@@ -278,8 +291,13 @@ EntityListTool = function(shouldUseEditTabletApp) {
         }
     };
 
+    function fromQml(message) {
+        console.log('entityList fromQML!!!!');
+    }
+
     webView.webEventReceived.connect(onWebEventReceived);
     entityListWindow.webEventReceived.addListener(onWebEventReceived);
+
     that.interactiveWindowHidden = entityListWindow.interactiveWindowHidden;
 
     return that;

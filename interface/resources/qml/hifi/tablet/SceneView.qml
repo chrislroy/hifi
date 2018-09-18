@@ -24,7 +24,12 @@ StackView {
     }
 
     function junk(data) {
-        console.log('function junk called')
+        console.log('Item selected: ', data.selection)
+        //sceneView.sendToScript(data)
+        sceneView.sendToScript({
+                                    method: "newEntityButtonClicked",
+                                    params: { buttonName: "newModelButton" }
+                                });
     }
 
     background: Rectangle {

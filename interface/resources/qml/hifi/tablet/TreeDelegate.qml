@@ -5,8 +5,10 @@ Item {
         anchors.fill: parent
         color: "#afafaf"
         elide: styleData.elideMode
-        text: styleData.value
-        //text: "Name: " + name + " - " + id
+        text: model.name
+        // works
+        // text: styleData.value
+        // text: "Name: " + model.name + " - " + model.id
         font.family: "Fira Sans SemiBold"
         font.pixelSize: hifi.fontSizes.textFieldInput
         height: hifi.dimensions.tableRowHeight

@@ -80,18 +80,22 @@ TabBar {
                        // delegate: Text { text: "Name: " + name + " - " + id }
                        selectionMode: SelectionMode.SingleSelection
                        onClicked: {
-                           console.log('On clicked called', treeView.currentIndex)
-                           console.log('                 ', Object.keys(treeView.currentIndex))
-                           console.log('                 ', treeView.currentIndex.model)
-                           console.log('                 ', treeView.currentIndex.id)
-                           console.log('                 ', treeView.currentIndex.name)
+                       /*
+                            console.log('On clicked called', treeView.currentIndex)
+                            console.log('                 ', Object.keys(treeView.currentIndex))
+                            console.log('                 ', treeView.currentIndex.model)
 
-                           sceneTabView.sendToScript({ selection : treeView.currentIndex })
+                            // works
+                            console.log('                 ', sceneModel.data(treeView.currentIndex,257)) // name
+                            console.log('                 ', sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id"))) // id
+                        */
+                           sceneTabView.sendToScript({ selection : sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id")) })
                            if (index.parent.row >= 0) {
                                console.log(index.parent.row, index.row)
                                console.log(tests.data(index))
                            }
                        }
+
                        // TODO - try this with images instead of Rectangle
                        //style: TreeViewStyle {
                        //    branchDelegate: Rectangle {
