@@ -22,7 +22,9 @@ TabBar {
         readonly property int graph: 1
     }
 
+    signal selectionChanged(var data);
     signal sendToScript(var message);
+
     readonly property HifiConstants hifi: HifiConstants {}
 
     EditTabButton {
@@ -37,6 +39,7 @@ TabBar {
                 url: Paths.defaultScripts + "/system/html/entityList.html"
                 enabled: true
             }
+
         }
     }
 
@@ -79,23 +82,20 @@ TabBar {
                        itemDelegate: TreeDelegate {}
                        // delegate: Text { text: "Name: " + name + " - " + id }
                        selectionMode: SelectionMode.SingleSelection
+
                        onClicked: {
-                       /*
-                            console.log('On clicked called', treeView.currentIndex)
-                            console.log('                 ', Object.keys(treeView.currentIndex))
-                            console.log('                 ', treeView.currentIndex.model)
+                            console.log('Connections::onClicked ID of Selected Item: ', sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id"))) // id
 
-                            // works
-                            console.log('                 ', sceneModel.data(treeView.currentIndex,257)) // name
-                            console.log('                 ', sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id"))) // id
-                        */
-                           sceneTabView.sendToScript({ selection : sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id")) })
-                           if (index.parent.row >= 0) {
-                               console.log(index.parent.row, index.row)
-                               console.log(tests.data(index))
-                           }
-                       }
+                            // NOT WORKNG selectionManager not global :(
+                            sendToScript({ selection : sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id")) });
 
+                            //sceneTabView.selectionChanged({ selection : sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id")) })
+
+                            if (index.parent.row >= 0) {
+                                console.log(index.parent.row, index.row)
+                                console.log(tests.data(index))
+                            }
+                        }
                        // TODO - try this with images instead of Rectangle
                        //style: TreeViewStyle {
                        //    branchDelegate: Rectangle {
@@ -110,12 +110,15 @@ TabBar {
 
 
                    } // TreeView
+
                 } // Flickable
             } // Rectangle
         } // Component
+
     } // EditTabButton
     
 
+    /*
     function fromScript(message) {
 
         console.log('editEntityList.fromScript');
@@ -127,8 +130,9 @@ TabBar {
                 console.warn('Unrecognized message:', JSON.stringify(message));
         }
     }
-
+    */
     // Changes the current tab based on tab index or title as input
+    /*
     function selectTab(id) {
         console.log('editEntityList.selectTab');
         if (typeof id === 'number') {
@@ -152,7 +156,7 @@ TabBar {
             console.warn('Attempt to switch tabs with invalid input:', JSON.stringify(id));
         }
     }
-
+    */
 }
 
 

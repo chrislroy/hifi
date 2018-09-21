@@ -4,9 +4,13 @@
 #include "SceneModel.h"
 #include <QStringList>
 
-SceneModel::SceneModel(QObject* parent) : QAbstractItemModel(parent) {
+SceneModel::SceneModel(QObject* parent)
+    : QAbstractItemModel(parent)
+{
+
     m_roleNameMapping[NodeRoleName] = "name";
     m_roleNameMapping[NodeRoleID] = "id";
+
     //m_roleNameMapping[NodeRoleType] = "type";
 
     QList<QVariant> rootData;
@@ -274,7 +278,7 @@ void SceneModel::refresh(QUuid entityId, int action) {
     setupModelData(entityId, action);
 }
 
-int SceneModel::getRoleKey(QString rolename) const
+int SceneModel::getRoleKey(const QString& rolename) const
 {
     return roleNames().key(rolename.toLatin1());
 }

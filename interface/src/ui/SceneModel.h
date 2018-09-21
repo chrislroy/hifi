@@ -32,11 +32,10 @@ public:
     int rowCount(const QModelIndex& parent = QModelIndex()) const Q_DECL_OVERRIDE;
     int columnCount(const QModelIndex& parent = QModelIndex()) const Q_DECL_OVERRIDE;
     QHash<int, QByteArray> roleNames() const Q_DECL_OVERRIDE;
-    Q_INVOKABLE int getRoleKey(QString rolename) const;
+    Q_INVOKABLE int getRoleKey(const QString& rolename) const;
     void refresh(QUuid, int);
 private:
     void setupModelData(QUuid, int);
-
     SceneNode* _rootItem = { nullptr };
     EntityTreePointer _treePointer = { nullptr };
 

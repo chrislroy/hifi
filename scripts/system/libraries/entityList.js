@@ -58,7 +58,7 @@ EntityListTool = function(shouldUseEditTabletApp) {
         false
     );
 
-    createToolsWindow.fromQml.addListener(fromQml);
+    entityListWindow.fromQml.addListener(fromQml);
 
     var webView = null;
     webView = Tablet.getTablet("com.highfidelity.interface.tablet.system");
@@ -84,15 +84,6 @@ EntityListTool = function(shouldUseEditTabletApp) {
 
     that.setVisible(false);
 
-    function updateSelectionFromGraph(data) {
-
-        console.log('Item selected: ', data.selection);
-
-        var selectedIDs = [];
-        selectedIDs.push(data.selection);
-
-        selectionManager.setSelections(selectedIDs);
-    }
 
     function emitJSONScriptEvent(data) {
         var dataString;
@@ -111,6 +102,17 @@ EntityListTool = function(shouldUseEditTabletApp) {
         that.setVisible(!visible);
     };
 
+    function updateSelectionFromGraph(data) {
+
+        console.log('Item selected: ', data.selection);
+
+        var selectedIDs = [];
+        selectedIDs.push(data.selection);
+
+        selectionManager.setSelections(selectedIDs);
+    }
+
+
     selectionManager.addEventListener(function() {
         var selectedIDs = [];
 
@@ -118,6 +120,7 @@ EntityListTool = function(shouldUseEditTabletApp) {
             selectedIDs.push(selectionManager.selections[i]);
         }
 
+        console.log("**** CROY **** updating selection!!!");
         emitJSONScriptEvent({
             type: 'selectionUpdate',
             selectedIDs: selectedIDs
@@ -224,11 +227,10 @@ EntityListTool = function(shouldUseEditTabletApp) {
         }
     }
 
-    var onWebEventReceived = function(data) {
+    var onWebEventReceived = function (data) {
         try {
-            data = JSON.parse(data);
 
-            console.log("**** CROY **** onWebEventReceived " + JSON.stringify(data));
+            data = JSON.parse(data);
 
         } catch(e) {
             print("entityList.js: Error parsing JSON: " + e.name + " data " + data);
@@ -292,7 +294,7 @@ EntityListTool = function(shouldUseEditTabletApp) {
     };
 
     function fromQml(message) {
-        console.log('entityList fromQML!!!!');
+        console.log('*********** function fromQml ***********');
     }
 
     webView.webEventReceived.connect(onWebEventReceived);

@@ -19,51 +19,58 @@ StackView {
                                   "width": sceneView.availableWidth,
                                   "height": sceneView.availableHeight }
     Component.onCompleted: {
-        tab.currentIndex = 0
-        tab.sendToScript.connect(junk)
+        sceneTabView.currentIndex = 0
     }
 
-    function junk(data) {
-        console.log('Item selected: ', data.selection)
-        //sceneView.sendToScript(data)
-        sceneView.sendToScript({
-                                    method: "newEntityButtonClicked",
-                                    params: { buttonName: "newModelButton" }
-                                });
-    }
 
     background: Rectangle {
         color: "#404040" //default background color
         SceneTabView {
-            id: tab
+            id: sceneTabView
             anchors.fill: parent
             currentIndex: -1
             onCurrentIndexChanged: {
-                sceneView.replace(null, tab.itemAt(currentIndex).visualItem,
+
+                sceneView.replace(null, sceneTabView.itemAt(currentIndex).visualItem,
                                  itemProperties,
                                  StackView.Immediate)
+
+                // sceneView.currentItem.sendToScript.connect(sceneView.sendToScript);
             }
+
+            onSelectionChanged : {
+                console.log('selectionChanged: ', data.selection)
+
+                sceneView.sendToScript({
+                    method: "newEntityButtonClicked",
+                    params: { buttonName: "newModelButton" }
+                });
+            }
+
         }
     }
 
     function pushSource(path) {
+        console.log("sceneView.qml pushSource");
+
         sceneView.push(Qt.resolvedUrl("../../" + path), itemProperties,
                       StackView.Immediate);
-        sceneView.currentItem.sendToScript.connect(editRoot.sendToScript);
+        sceneView.currentItem.sendToScript.connect(sceneView.sendToScript);
     }
 
     function popSource() {
+        console.log("sceneView.qml popSource");
         sceneView.pop(StackView.Immediate);
     }
 
     // Passes script messages to the item on the top of the stack
     function fromScript(message) {
-
+        console.log("SceneView.fromScript");
         var currentItem = sceneModel.currentItem;
         if (currentItem && currentItem.fromScript) {
             currentItem.fromScript(message);
-        } else if (tab.fromScript) {
-            tab.fromScript(message);
+        } else if (sceneTabView.fromScript) {
+            sceneTabView.fromScript(message);
         }
     }
 }
