@@ -11,6 +11,7 @@
 /* global EntityListTool, Tablet, selectionManager, Entities, Camera, MyAvatar, Vec3, Menu, Messages,
    cameraManager, MENU_EASE_ON_FOCUS, deleteSelectedEntities, toggleSelectedEntitiesLocked, toggleSelectedEntitiesVisible */
 
+
 var PROFILING_ENABLED = false;
 var profileIndent = '';
 const PROFILE_NOOP = function(_name, fn, args) {

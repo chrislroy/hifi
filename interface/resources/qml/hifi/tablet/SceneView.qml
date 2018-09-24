@@ -34,8 +34,6 @@ StackView {
                 sceneView.replace(null, sceneTabView.itemAt(currentIndex).visualItem,
                                  itemProperties,
                                  StackView.Immediate)
-
-                // sceneView.currentItem.sendToScript.connect(sceneView.sendToScript);
             }
 
             onSelectionChanged : {

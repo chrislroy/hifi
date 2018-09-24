@@ -865,6 +865,7 @@ var toolBar = (function () {
             Controller.disableMapping(CONTROLLER_MAPPING_NAME);
         } else {
             if (shouldUseEditTabletApp()) {
+                console.log("tablet.loadQMLSource( edit.qml, true)");
                 tablet.loadQMLSource("hifi/tablet/Edit.qml", true);
             } else {
                 // make other apps inactive while in desktop mode

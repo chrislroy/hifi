@@ -39,9 +39,9 @@ TabBar {
                 url: Paths.defaultScripts + "/system/html/entityList.html"
                 enabled: true
             }
-
         }
     }
+
 
     EditTabButton {
         title: "GRAPH"
@@ -72,24 +72,29 @@ TabBar {
                         }
                     }
 
-                   TreeView {
-                       id: treeView
-                       anchors.fill: parent
-                       model: sceneModel
-                       alternatingRowColors: false
-                       backgroundVisible: false
-                       headerVisible: false
-                       itemDelegate: TreeDelegate {}
-                       // delegate: Text { text: "Name: " + name + " - " + id }
-                       selectionMode: SelectionMode.SingleSelection
+                    TreeView {
+                        id: treeView
+                        anchors.fill: parent
+                        model: sceneModel
+                        alternatingRowColors: false
+                        backgroundVisible: false
+                        headerVisible: false
+                        itemDelegate: TreeDelegate {}
+                        // delegate: Text { text: "Name: " + name + " - " + id }
+                        selectionMode: SelectionMode.SingleSelection
 
-                       onClicked: {
+                        Component.onCompleted: {
+                            console.log("treeView onCompleted")
+
+                            // sceneTabView.sendToScript.connect(treeView.sendToScript);
+                        }
+                        onClicked: {
                             console.log('Connections::onClicked ID of Selected Item: ', sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id"))) // id
 
                             // NOT WORKNG selectionManager not global :(
-                            sendToScript({ selection : sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id")) });
+                            // sendToScript({ selection : sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id")) });
 
-                            //sceneTabView.selectionChanged({ selection : sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id")) })
+                            // sceneTabView.selectionChanged({ selection : sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id")) })
 
                             if (index.parent.row >= 0) {
                                 console.log(index.parent.row, index.row)
@@ -116,7 +121,7 @@ TabBar {
         } // Component
 
     } // EditTabButton
-    
+
 
     /*
     function fromScript(message) {
