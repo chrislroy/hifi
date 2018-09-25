@@ -295,7 +295,13 @@ EntityListTool = function(shouldUseEditTabletApp) {
     };
 
     function fromQml(message) {
-        console.log('*********** function fromQml ***********');
+        console.log('*********** entityList.js function fromQml ***********');
+
+        var selectedIDs = [];
+
+        selectedIDs.push(message.selection);
+
+        selectionManager.setSelections(selectedIDs);
     }
 
     webView.webEventReceived.connect(onWebEventReceived);

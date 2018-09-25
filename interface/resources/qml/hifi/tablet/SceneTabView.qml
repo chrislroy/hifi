@@ -22,7 +22,6 @@ TabBar {
         readonly property int graph: 1
     }
 
-    signal selectionChanged(var data);
     signal sendToScript(var message);
 
     readonly property HifiConstants hifi: HifiConstants {}
@@ -92,9 +91,11 @@ TabBar {
                             console.log('Connections::onClicked ID of Selected Item: ', sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id"))) // id
 
                             // NOT WORKNG selectionManager not global :(
-                            // sendToScript({ selection : sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id")) });
-
-                            // sceneTabView.selectionChanged({ selection : sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id")) })
+                            sceneView.sendToScript({ selection : sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id")) });
+                            //sceneView.sendToScript({
+                            //        method: "newEntityButtonClicked",
+                            //        params: { buttonName: "newModelButton" }
+                            //    });
 
                             if (index.parent.row >= 0) {
                                 console.log(index.parent.row, index.row)

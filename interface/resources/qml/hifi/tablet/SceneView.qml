@@ -36,15 +36,6 @@ StackView {
                                  StackView.Immediate)
             }
 
-            onSelectionChanged : {
-                console.log('selectionChanged: ', data.selection)
-
-                sceneView.sendToScript({
-                    method: "newEntityButtonClicked",
-                    params: { buttonName: "newModelButton" }
-                });
-            }
-
         }
     }
 
