@@ -295,8 +295,6 @@ EntityListTool = function(shouldUseEditTabletApp) {
     };
 
     function fromQml(message) {
-        console.log('*********** entityList.js function fromQml ***********');
-
         var selectedIDs = [];
 
         selectedIDs.push(message.selection);

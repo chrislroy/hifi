@@ -82,20 +82,10 @@ TabBar {
                         // delegate: Text { text: "Name: " + name + " - " + id }
                         selectionMode: SelectionMode.SingleSelection
 
-                        Component.onCompleted: {
-                            console.log("treeView onCompleted")
-
-                            // sceneTabView.sendToScript.connect(treeView.sendToScript);
-                        }
                         onClicked: {
                             console.log('Connections::onClicked ID of Selected Item: ', sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id"))) // id
 
-                            // NOT WORKNG selectionManager not global :(
                             sceneView.sendToScript({ selection : sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id")) });
-                            //sceneView.sendToScript({
-                            //        method: "newEntityButtonClicked",
-                            //        params: { buttonName: "newModelButton" }
-                            //    });
 
                             if (index.parent.row >= 0) {
                                 console.log(index.parent.row, index.row)
@@ -116,7 +106,6 @@ TabBar {
 
 
                    } // TreeView
-
                 } // Flickable
             } // Rectangle
         } // Component
