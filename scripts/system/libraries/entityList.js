@@ -295,11 +295,22 @@ EntityListTool = function(shouldUseEditTabletApp) {
     };
 
     function fromQml(message) {
-        var selectedIDs = [];
+        switch (message.method) {
+            case "selection":
+                console.log("updating selection");
+                var selectedIDs = [];
 
-        selectedIDs.push(message.selection);
+                selectedIDs.push(message.params.selection);
 
-        selectionManager.setSelections(selectedIDs);
+                selectionManager.setSelections(selectedIDs);
+                break;
+            case "reparent":
+                console.log("reparenting");
+                break;
+        }
+        if (message.method === "selection") {
+
+        }
     }
 
     webView.webEventReceived.connect(onWebEventReceived);
