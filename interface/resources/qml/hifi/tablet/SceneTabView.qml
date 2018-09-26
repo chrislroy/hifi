@@ -70,42 +70,51 @@ TabBar {
                             color: hifi.colors.tableScrollBackgroundDark
                         }
                     }
+                    
+                    MouseArea {
+                        id: dndarea;
+                        anchors.fill: parent;
+                        drag.target: treeView;
 
-                    TreeView {
-                        id: treeView
-                        anchors.fill: parent
-                        model: sceneModel
-                        alternatingRowColors: false
-                        backgroundVisible: false
-                        headerVisible: false
-                        itemDelegate: TreeDelegate {}
-                        // delegate: Text { text: "Name: " + name + " - " + id }
-                        selectionMode: SelectionMode.SingleSelection
+                        TreeView {
+                            id: treeView
+                            anchors.fill: parent
+                            model: sceneModel
+                            alternatingRowColors: false
+                            backgroundVisible: false
+                            headerVisible: false
+                            itemDelegate: TreeDelegate {}
+                            selectionMode: SelectionMode.SingleSelection
+                            /*
+                                //cursorShape: pressed ? Qt.OpenHandCursor : Qt.ClosedHandCursor; 
+                                //acceptedButtons: Qt.NoButton
 
-                        onClicked: {
-                            console.log('Connections::onClicked ID of Selected Item: ', sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id"))) // id
+                            } // MouseArea
+                            */
+                            onClicked: {
+                                console.log('Connections::onClicked ID of Selected Item: ', sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id"))) // id
 
-                            sceneView.sendToScript({ selection : sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id")) });
+                                //dndarea.drag.target = sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id"));
 
-                            if (index.parent.row >= 0) {
-                                console.log(index.parent.row, index.row)
-                                console.log(tests.data(index))
+                                sceneView.sendToScript({ 
+                                    method: "selection" , 
+                                    params: { selection: sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id")) } 
+                                });
+    
                             }
-                        }
-                       // TODO - try this with images instead of Rectangle
-                       //style: TreeViewStyle {
-                       //    branchDelegate: Rectangle {
-                       //        width: 15; height: 15
-                       //        color: styleData.isExpanded ? "red" : "green"
-                       //    }
-                       //}
-                       TableViewColumn {
-                           title: "Name"
-                           role: "name"
-                       }
 
+                            TableViewColumn {
+                                title: "Name"
+                                role: "name"
+                            }
 
-                   } // TreeView
+                            DropArea {
+                                anchors.fill: parent
+
+                                onEntered: console.log('**** DND active ****')
+                            }
+                        } // TreeView
+                    } // MouseArea
                 } // Flickable
             } // Rectangle
         } // Component
