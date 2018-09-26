@@ -1,10 +1,17 @@
 import QtQuick 2.0
 
+Rectangle {
+    id: item
+    color: "#404040"
 
-Item {
+    Component.onCompleted : { 
+        console.log("TreeDelegate in completed:", model.id)
+    }
+
     Text {
+        id: text
         anchors.fill: parent
-        color: "#afafaf"
+        color: "#ffffff"
         elide: styleData.elideMode
         text: model.name
 
@@ -12,4 +19,40 @@ Item {
         font.pixelSize: hifi.fontSizes.textFieldInput
         height: hifi.dimensions.tableRowHeight
     }
+
+    DropArea {
+        id: dropArea
+        anchors.fill: parent
+        keys: ["text/plain"]
+        onEntered: console.log('onEntered');
+        onDropped: {
+            sceneView.sendToScript({ 
+                method: "reparent" , 
+                params: { child: drop.text, parent: model.id } 
+            });
+        }
+    }
+
+    MouseArea {
+        id: mouseArea
+        anchors.fill: parent
+        drag.target: draggable
+        onClicked: {
+            sceneView.sendToScript({ 
+                method: "selection" , 
+                params: { selection: model.id } 
+            });
+        }
+    }
+
+    Item {
+        id: draggable
+        anchors.fill: parent
+        Drag.active: mouseArea.drag.active
+        Drag.hotSpot.x: 0
+        Drag.hotSpot.y: 0
+        Drag.mimeData: { "text/plain": model.id }
+        Drag.dragType: Drag.Automatic
+    }
 }
+

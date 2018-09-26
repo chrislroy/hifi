@@ -1571,6 +1571,7 @@ function parentSelectedEntities() {
                 if (parentId !== lastEntityId) {
                     parentCheck = true;
                 }
+
                 Entities.editEntity(id, {parentID: lastEntityId});
             }
         });

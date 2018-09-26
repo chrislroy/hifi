@@ -85,22 +85,13 @@ TabBar {
                             headerVisible: false
                             itemDelegate: TreeDelegate {}
                             selectionMode: SelectionMode.SingleSelection
-                            /*
-                                //cursorShape: pressed ? Qt.OpenHandCursor : Qt.ClosedHandCursor; 
-                                //acceptedButtons: Qt.NoButton
 
-                            } // MouseArea
-                            */
-                            onClicked: {
-                                console.log('Connections::onClicked ID of Selected Item: ', sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id"))) // id
+                            onCollapsed: {
+                                console.log("collapsed ", index)
+                            }
 
-                                //dndarea.drag.target = sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id"));
-
-                                sceneView.sendToScript({ 
-                                    method: "selection" , 
-                                    params: { selection: sceneModel.data(treeView.currentIndex, sceneModel.getRoleKey("id")) } 
-                                });
-    
+                            onExpanded: {
+                                console.log("expanded ", index)
                             }
 
                             TableViewColumn {
@@ -108,11 +99,6 @@ TabBar {
                                 role: "name"
                             }
 
-                            DropArea {
-                                anchors.fill: parent
-
-                                onEntered: console.log('**** DND active ****')
-                            }
                         } // TreeView
                     } // MouseArea
                 } // Flickable

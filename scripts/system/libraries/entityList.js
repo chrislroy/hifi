@@ -103,17 +103,6 @@ EntityListTool = function(shouldUseEditTabletApp) {
         that.setVisible(!visible);
     };
 
-    function updateSelectionFromGraph(data) {
-
-        console.log('Item selected: ', data.selection);
-
-        var selectedIDs = [];
-        selectedIDs.push(data.selection);
-
-        selectionManager.setSelections(selectedIDs);
-    }
-
-
     selectionManager.addEventListener(function() {
         var selectedIDs = [];
 
@@ -297,20 +286,19 @@ EntityListTool = function(shouldUseEditTabletApp) {
     function fromQml(message) {
         switch (message.method) {
             case "selection":
-                console.log("updating selection");
+                console.log("select " + message.params.selection);
                 var selectedIDs = [];
-
                 selectedIDs.push(message.params.selection);
-
                 selectionManager.setSelections(selectedIDs);
                 break;
             case "reparent":
-                console.log("reparenting");
+                var data = message.params;
+                var msg = "updating parent " + data.child + " to " + data.parent;
+                Entities.editEntity(Uuid.fromString(data.child), { parentID: Uuid.fromString(data.parent) });
+                
                 break;
         }
-        if (message.method === "selection") {
 
-        }
     }
 
     webView.webEventReceived.connect(onWebEventReceived);
