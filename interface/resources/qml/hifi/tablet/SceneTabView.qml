@@ -85,15 +85,17 @@ TabBar {
                             headerVisible: false
                             itemDelegate: TreeDelegate {}
                             selectionMode: SelectionMode.SingleSelection
-
+                            /*
                             onCollapsed: {
-                                console.log("collapsed ", index)
+                                console.log("collapsed ", sceneModel.get(index).name);
+                                sceneModel.get(index).collapsed = true;
                             }
 
                             onExpanded: {
-                                console.log("expanded ", index)
+                                console.log("expanded ", sceneModel.get(index).name);
+                                sceneModel.get(index).collapsed = false;
                             }
-
+                            */
                             TableViewColumn {
                                 title: "Name"
                                 role: "name"

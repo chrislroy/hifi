@@ -13,7 +13,7 @@ Rectangle {
         anchors.fill: parent
         color: "#ffffff"
         elide: styleData.elideMode
-        text: model.name
+        text: model.name ? model.name : ""
 
         font.family: "Fira Sans SemiBold"
         font.pixelSize: hifi.fontSizes.textFieldInput
@@ -51,7 +51,7 @@ Rectangle {
         Drag.active: mouseArea.drag.active
         Drag.hotSpot.x: 0
         Drag.hotSpot.y: 0
-        Drag.mimeData: { "text/plain": model.id }
+        Drag.mimeData: { "text/plain": model.id ? model.id : "" }
         Drag.dragType: Drag.Automatic
     }
 }
