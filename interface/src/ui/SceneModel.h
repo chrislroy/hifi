@@ -15,9 +15,7 @@ public:
     enum NodeRole
     {
         NodeRoleName = Qt::UserRole + 1,
-        NodeRoleType,
         NodeRoleID,
-        NodeRoleParentID
     };
 
     SceneModel(QObject* parent = 0);

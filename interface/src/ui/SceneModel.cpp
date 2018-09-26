@@ -15,8 +15,7 @@ SceneModel::SceneModel(QObject* parent)
 
     QList<QVariant> rootData;
     rootData << "Name";
-    //rootData << "Type";
-    //rootData << "ID";
+
     _rootItem = new SceneNode(rootData);
 }
 
@@ -48,7 +47,7 @@ QVariant SceneModel::data(const QModelIndex& index, int role) const {
         return QVariant();
 
     // we use only the name for now...
-    if (role != NodeRoleName && role != NodeRoleID && role != NodeRoleType && role != NodeRoleParentID)
+    if (role != NodeRoleName && role != NodeRoleID)
         return QVariant();
 
     SceneNode* item = static_cast<SceneNode*>(index.internalPointer());
@@ -60,7 +59,7 @@ bool SceneModel::setData(const QModelIndex &index, const QVariant &value, int ro
 {
     if (!index.isValid())
         return false;
-    if (role != NodeRoleName && role != NodeRoleID && role != NodeRoleType && role != NodeRoleParentID)
+    if (role != NodeRoleName && role != NodeRoleID)
         return false;
     SceneNode* item = static_cast<SceneNode*>(index.internalPointer());
     item->updateData(role, value);
@@ -180,9 +179,7 @@ void SceneModel::setupModelData(QUuid entityID, int action) {
 
             QList<QVariant> columnData;
             columnData << name;
-            columnData << type;
             columnData << id.toString();
-            columnData << parentId.toString();
 
             auto node = new SceneNode(columnData, parentNode);
             parentNode->appendChild(node);
@@ -220,9 +217,7 @@ void SceneModel::setupModelData(QUuid entityID, int action) {
 
         QList<QVariant> columnData;
         columnData << name;
-        columnData << type;
         columnData << id.toString();
-        columnData << parentId.toString();
 
         auto parentNode = _rootItem;
         if (!parentId.isNull())

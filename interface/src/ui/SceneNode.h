@@ -13,8 +13,9 @@ class SceneNode : public QObject
 
 public:
 
-    Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
-    Q_PROPERTY(QString id READ id WRITE setId NOTIFY idChanged)
+    //Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
+    //Q_PROPERTY(QString id READ id WRITE setId NOTIFY idChanged)
+    //Q_PROPERTY(bool collapsed READ collapsed WRITE setCollapsed NOTIFY collapsedChanged)
 
     explicit SceneNode(const QList<QVariant>& data, SceneNode* parent = 0);
     ~SceneNode();
@@ -29,9 +30,9 @@ public:
     void updateData(int column, const QVariant& data);
     int row() const;
     SceneNode* parentNode();
-
     void deleteAllChildren();
     QList<SceneNode*> takeChildren();
+    /*
     void setName(QString name)
     {
         m_name = name;
@@ -47,19 +48,35 @@ public:
         m_id = id;
         emit idChanged(id);
     }
+
     QString id() const
     {
         return m_id;
     }
+
+    void setCollapsed(bool collapsed) {
+        m_collapsed = collapsed;
+        emit collapsedChanged(collapsed);
+    }
+
+    bool collapsed() const {
+        return m_collapsed;
+    }
+
 signals:
     void nameChanged(QString);
     void idChanged(QString);
+    void collapsedChanged(bool);
+    */
 private:
-    QString m_name;
-    QString m_id;
+    /*
+    bool m_collapsed = { false };
+    QString m_name = "";
+    QString m_id = "";
+    */
     QList<SceneNode*> m_childItems;
     QList<QVariant> m_itemData;
-    SceneNode* m_parentItem;
+    SceneNode* m_parentItem = nullptr;
 };
 //! [0]
 
