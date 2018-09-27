@@ -194,18 +194,14 @@ void SceneModel::setupModelData(QUuid entityID, int action) {
     else if (action == EntityTree::EntityDeletedAction) {
         qDebug() << "Delete entity " << entityID.toString();
         Q_ASSERT(m_nodeMap.contains(entityID));
-        auto node = m_nodeMap.find(entityID);
-        auto nodeRow = (*node)->row();
-        auto parentNode = (*node)->parentNode();
+        auto node = m_nodeMap.take(entityID);
+        auto nodeRow = node->row();
+        auto parentNode = node->parentNode();
         auto parentIndex = createIndex(nodeRow, 0, parentNode);
 
         beginRemoveRows(parentIndex, nodeRow, nodeRow);
-
-        parentNode->removeChild((*node));
-        m_nodeMap.erase(node);
-
-        delete (*node);
-        
+        parentNode->removeChild(node);
+        delete node;
         endRemoveRows();
     }
     else if (action == EntityTree::EntityAddedAction) {
@@ -247,21 +243,21 @@ void SceneModel::setupModelData(QUuid entityID, int action) {
         Q_ASSERT(m_nodeMap.contains(entityID));
 
         auto entity = treeMap.value(entityID);
-        auto node = m_nodeMap.find(entityID);
-        auto sourceRow = (*node)->row();
-        auto sourceParent = (*node)->parentNode();
+        auto node = m_nodeMap.value(entityID);
+        auto sourceRow = node->row();
+        auto sourceParent = node->parentNode();
         auto sourceIndex = createIndex(sourceParent->row(), 0, sourceParent);
 
-        auto targetNode = m_nodeMap.find(entity->getParentID());
-        auto targetParentNode = (*targetNode)->parentNode();
-        auto targetIndex = createIndex(targetParentNode->row(), 0, targetParentNode);
+        Q_ASSERT(m_nodeMap.contains(entity->getParentID()));
+        auto targetParent = m_nodeMap.value(entity->getParentID());
+        auto targetIndex = createIndex(targetParent->row(), 0, targetParent);
 
-        beginMoveRows(sourceIndex, sourceRow, sourceRow, targetIndex, targetParentNode->childCount());
+        beginMoveRows(sourceIndex, sourceRow, sourceRow, targetIndex, targetParent->childCount());
 
         // remove this item from its parent
-        sourceParent->removeChild((*node));
+        sourceParent->removeChild(node);
         // reparent it
-        (*targetNode)->appendChild((*node));
+        targetParent->appendChild(node);
 
         endMoveRows();
 
@@ -270,10 +266,9 @@ void SceneModel::setupModelData(QUuid entityID, int action) {
         Q_ASSERT(treeMap.contains(entityID));
         Q_ASSERT(m_nodeMap.contains(entityID));
         auto entity = treeMap.value(entityID);
-        auto node = m_nodeMap.find(entityID);
-        auto itemIndex = createIndex((*node)->row(), 0, (*node));
+        auto node = m_nodeMap.value(entityID);
+        auto itemIndex = createIndex(node->row(), 0, node);
         setData(itemIndex, entity->getName(), NodeRoleName);
-
     }
     else {
          qDebug("**** ERROR UPDATING SCENE MODEL ****");
