@@ -2136,9 +2136,7 @@ var PropertiesTool = function (opts) {
     var onWebEventReceived = function(data) {
         try {
             data = JSON.parse(data);
-        }
-        catch(e) {
-            print('Edit.js received web event that was not valid json.');
+        } catch(e) {
             return;
         }
         var i, properties, dY, diff, newPosition;
