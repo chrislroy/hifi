@@ -465,6 +465,7 @@ bool EntityTree::updateEntity(EntityItemPointer entity,
                     emit updateSceneModel(entity->getEntityItemID(), NameChangedAction);
                 else
                     emit updateSceneModel(entity->getEntityItemID(), ParentChangedAction);
+            }
         }
 
         QString entityScriptBefore = entity->getScript();

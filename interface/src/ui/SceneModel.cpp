@@ -257,7 +257,7 @@ void SceneModel::setupModelData(QUuid entityID, int action) {
         // remove this item from its parent
         sourceParent->removeChild((*node));
         // reparent it
-        targetNode->appendChild((*node));
+        (*targetNode)->appendChild((*node));
         endMoveRows();
 
     } else if (action == EntityTree::NameChangedAction) {
