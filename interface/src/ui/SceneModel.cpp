@@ -16,7 +16,7 @@ SceneModel::SceneModel(QObject* parent)
     QList<QVariant> rootData;
     rootData << "Name";
 
-    m_rootItem = new SceneNode(rootData);
+    m_rootItem = new SceneNode(rootData, nullptr);
 }
 
 SceneModel::~SceneModel() {
@@ -192,21 +192,28 @@ void SceneModel::setupModelData(QUuid entityID, int action) {
         endResetModel();
     }
     else if (action == EntityTree::EntityDeletedAction) {
+        // TODO - TEST
         qDebug() << "Delete entity " << entityID.toString();
         Q_ASSERT(m_nodeMap.contains(entityID));
         auto node = m_nodeMap.take(entityID);
         auto nodeRow = node->row();
-        auto parentNode = node->parentNode();
-        auto parentIndex = createIndex(nodeRow, 0, parentNode);
+        auto parentNode = m_rootItem;
+        auto parentIndex = QModelIndex();
+        if (node->parentNode() != m_rootItem) {
+            parentNode = node->parentNode();
+            parentIndex = createIndex(parentNode->row(), 0, parentNode);
+        }
 
         beginRemoveRows(parentIndex, nodeRow, nodeRow);
         parentNode->removeChild(node);
         delete node;
         endRemoveRows();
+
+        emit dataChanged(parentIndex, parentIndex, { NodeRoleName });
     }
     else if (action == EntityTree::EntityAddedAction) {
-        // TODO - TEST
-        qDebug() << "Adding entity " << entityID.toString();
+        // working!!!
+        qDebug() << "Adding entity ID " << entityID.toString() << " to model";
 
         Q_ASSERT(treeMap.contains(entityID));
 
@@ -220,14 +227,12 @@ void SceneModel::setupModelData(QUuid entityID, int action) {
         columnData << id.toString();
 
         auto parentNode = m_rootItem;
-        if (!parentId.isNull())
+        auto parentIndex = QModelIndex();
+        if (!parentId.isNull()) {
             parentNode = m_nodeMap[parentId];
-
+            parentIndex = createIndex(parentNode->row(), 0, parentNode);
+        }
         auto nodeRow = parentNode->childCount();
-
-        auto parentIndex = createIndex(parentNode->row(), 0, parentNode);
-
-        qDebug() << "Adding element: " << qPrintable(name) << " id " << qPrintable(id.toString()) << " row " << nodeRow;
 
         beginInsertRows(parentIndex, nodeRow, nodeRow);
 
@@ -236,6 +241,7 @@ void SceneModel::setupModelData(QUuid entityID, int action) {
         m_nodeMap[id] = node;
 
         endInsertRows();
+
     } else if (action == EntityTree::ParentChangedAction) {
         // TODO -TEST
 
@@ -245,24 +251,40 @@ void SceneModel::setupModelData(QUuid entityID, int action) {
         auto entity = treeMap.value(entityID);
         auto node = m_nodeMap.value(entityID);
         auto sourceRow = node->row();
+
+        auto parentNode = m_rootItem;
+        if (!entity->getParentID().isNull())
+            parentNode = m_nodeMap[entity->getParentID()];
+        
         auto sourceParent = node->parentNode();
+        if (sourceParent == nullptr)
+            sourceParent = m_rootItem;
+
         auto sourceIndex = createIndex(sourceParent->row(), 0, sourceParent);
 
         Q_ASSERT(m_nodeMap.contains(entity->getParentID()));
         auto targetParent = m_nodeMap.value(entity->getParentID());
-        auto targetIndex = createIndex(targetParent->row(), 0, targetParent);
+        // target parent null means that we are using manipulator
+        if (targetParent) {
+            auto targetIndex = createIndex( targetParent->row(), 0, targetParent);
+            // we are releasing the manipulator - do nothing
+            if (sourceIndex != targetIndex) {
+                beginMoveRows(sourceIndex, sourceRow, sourceRow, targetIndex, targetParent->childCount());
 
-        beginMoveRows(sourceIndex, sourceRow, sourceRow, targetIndex, targetParent->childCount());
+                // remove this item from its parent
+                sourceParent->removeChild(node);
+                // reparent it
+                targetParent->appendChild(node);
 
-        // remove this item from its parent
-        sourceParent->removeChild(node);
-        // reparent it
-        targetParent->appendChild(node);
+                endMoveRows();
+                emit dataChanged(sourceIndex, targetIndex, { NodeRoleName });
+            }
 
-        endMoveRows();
+        }
+
 
     } else if (action == EntityTree::NameChangedAction) {
-        qDebug() << "Entity name changed";
+        // working!!!
         Q_ASSERT(treeMap.contains(entityID));
         Q_ASSERT(m_nodeMap.contains(entityID));
         auto entity = treeMap.value(entityID);

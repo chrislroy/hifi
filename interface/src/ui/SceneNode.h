@@ -17,7 +17,7 @@ public:
     //Q_PROPERTY(QString id READ id WRITE setId NOTIFY idChanged)
     //Q_PROPERTY(bool collapsed READ collapsed WRITE setCollapsed NOTIFY collapsedChanged)
 
-    explicit SceneNode(const QList<QVariant>& data, SceneNode* parent = 0);
+    explicit SceneNode(const QList<QVariant>& data, SceneNode* parent);
     ~SceneNode();
 
     SceneNode* parentNode();

@@ -310,8 +310,10 @@ void EntityTree::postAddEntity(EntityItemPointer entity) {
     entity->setName(generateEntityName(entity->getEntityItemID()));
 
     emit addingEntity(entity->getEntityItemID());
-    if (_enableUpdate)
+    if (_enableUpdate) {
+        qDebug() << "Adding entity:" << qPrintable(entity->getName());
         emit updateSceneModel(entity->getEntityItemID(), EntityAddedAction);
+    }
 }
 
 bool EntityTree::updateEntity(const EntityItemID& entityID,
