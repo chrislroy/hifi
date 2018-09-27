@@ -42,8 +42,7 @@ void SceneNode::appendChild(SceneNode *item)
 void SceneNode::removeChild(SceneNode* child)
 {
     child->setParent(nullptr);
-    int i = m_childItems.indexOf(child);
-    m_childItems.removeAt(i);
+    m_childItems.removeAll(child);
 }
 
 SceneNode *SceneNode::child(int row)

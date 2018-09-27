@@ -34,7 +34,7 @@ public:
     void refresh(QUuid, int);
 private:
     void setupModelData(QUuid, int);
-    SceneNode* _rootItem = { nullptr };
+    SceneNode* m_rootItem = { nullptr };
     EntityTreePointer _treePointer = { nullptr };
 
     QHash<int, QByteArray> m_roleNameMapping;

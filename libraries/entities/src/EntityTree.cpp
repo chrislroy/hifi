@@ -455,18 +455,6 @@ bool EntityTree::updateEntity(EntityItemPointer entity,
             }
         }
         // else client accepts what the server says
-        auto nameChanged = properties.hasNameChanged();
-        auto parentChanged = properties.hasParentChanged();
-        if (nameChanged||parentChanged) {
-            // CROY - bypass property change
-            entity->setName(generateEntityName(entity->getEntityItemID()));
-            if (_enableUpdate) {
-                if (nameChanged)
-                    emit updateSceneModel(entity->getEntityItemID(), NameChangedAction);
-                else
-                    emit updateSceneModel(entity->getEntityItemID(), ParentChangedAction);
-            }
-        }
 
         QString entityScriptBefore = entity->getScript();
         quint64 entityScriptTimestampBefore = entity->getScriptTimestamp();
@@ -518,6 +506,19 @@ bool EntityTree::updateEntity(EntityItemPointer entity,
                 if (childChild && childChild->getNestableType() == NestableType::Entity) {
                     toProcess.enqueue(childChild);
                 }
+            }
+        }
+
+        auto nameChanged = properties.hasNameChanged();
+        auto parentChanged = properties.hasParentChanged();
+        if (nameChanged || parentChanged) {
+            // CROY - bypass property change
+            entity->setName(generateEntityName(entity->getEntityItemID()));
+            if (_enableUpdate) {
+                if (nameChanged)
+                    emit updateSceneModel(entity->getEntityItemID(), NameChangedAction);
+                else
+                    emit updateSceneModel(entity->getEntityItemID(), ParentChangedAction);
             }
         }
 
