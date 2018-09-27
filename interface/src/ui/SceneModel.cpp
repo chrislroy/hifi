@@ -144,6 +144,8 @@ void SceneModel::setupModelData(QUuid entityID, int action) {
 
     QHash<EntityItemID, EntityItemPointer> treeMap = _treePointer->getTreeMap();
     if (action == EntityTree::InitializeAction) {
+        // working!!!
+
         qDebug() << "Buidling model" << entityID.toString();
         beginResetModel();
 
@@ -192,7 +194,7 @@ void SceneModel::setupModelData(QUuid entityID, int action) {
         endResetModel();
     }
     else if (action == EntityTree::EntityDeletedAction) {
-        // TODO - TEST
+        // working!!!
         qDebug() << "Delete entity " << entityID.toString();
         Q_ASSERT(m_nodeMap.contains(entityID));
         auto node = m_nodeMap.take(entityID);
@@ -208,8 +210,6 @@ void SceneModel::setupModelData(QUuid entityID, int action) {
         parentNode->removeChild(node);
         delete node;
         endRemoveRows();
-
-        emit dataChanged(parentIndex, parentIndex, { NodeRoleName });
     }
     else if (action == EntityTree::EntityAddedAction) {
         // working!!!
@@ -249,39 +249,39 @@ void SceneModel::setupModelData(QUuid entityID, int action) {
         Q_ASSERT(m_nodeMap.contains(entityID));
 
         auto entity = treeMap.value(entityID);
-        auto node = m_nodeMap.value(entityID);
-        auto sourceRow = node->row();
-
-        auto parentNode = m_rootItem;
-        if (!entity->getParentID().isNull())
-            parentNode = m_nodeMap[entity->getParentID()];
-        
-        auto sourceParent = node->parentNode();
-        if (sourceParent == nullptr)
-            sourceParent = m_rootItem;
-
-        auto sourceIndex = createIndex(sourceParent->row(), 0, sourceParent);
-
         Q_ASSERT(m_nodeMap.contains(entity->getParentID()));
+
+        auto reparentedNode = m_nodeMap.value(entityID);
+        auto startRow = reparentedNode->row();
+        auto sourceParent = m_rootItem;
+        auto sourceIndex = QModelIndex();
+
+        if (reparentedNode->parentNode() != m_rootItem) {
+            sourceParent = reparentedNode->parentNode();
+            sourceIndex = createIndex(sourceParent->row(), 0, sourceParent);
+        }
+
         auto targetParent = m_nodeMap.value(entity->getParentID());
+        auto targetIndex = QModelIndex();
+
         // target parent null means that we are using manipulator
         if (targetParent) {
-            auto targetIndex = createIndex( targetParent->row(), 0, targetParent);
+            
+            if (targetParent != m_rootItem)
+                targetIndex = createIndex(targetParent->row(), 0, targetParent);
             // we are releasing the manipulator - do nothing
             if (sourceIndex != targetIndex) {
-                beginMoveRows(sourceIndex, sourceRow, sourceRow, targetIndex, targetParent->childCount());
+                beginMoveRows(sourceIndex, startRow, startRow, targetIndex, targetParent->childCount());
 
                 // remove this item from its parent
-                sourceParent->removeChild(node);
+                sourceParent->removeChild(reparentedNode);
                 // reparent it
-                targetParent->appendChild(node);
+                targetParent->appendChild(reparentedNode);
 
                 endMoveRows();
-                emit dataChanged(sourceIndex, targetIndex, { NodeRoleName });
             }
 
         }
-
 
     } else if (action == EntityTree::NameChangedAction) {
         // working!!!
