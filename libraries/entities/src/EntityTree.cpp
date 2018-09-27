@@ -311,7 +311,7 @@ void EntityTree::postAddEntity(EntityItemPointer entity) {
 
     emit addingEntity(entity->getEntityItemID());
     if (_enableUpdate)
-        emit updateSceneModel(entity->getEntityItemID(), AddElementAction);
+        emit updateSceneModel(entity->getEntityItemID(), EntityAddedAction);
 }
 
 bool EntityTree::updateEntity(const EntityItemID& entityID,
@@ -455,12 +455,16 @@ bool EntityTree::updateEntity(EntityItemPointer entity,
             }
         }
         // else client accepts what the server says
-
-        if (properties.needToUpdateModel()) {
+        auto nameChanged = properties.hasNameChanged();
+        auto parentChanged = properties.hasParentChanged();
+        if (nameChanged||parentChanged) {
             // CROY - bypass property change
             entity->setName(generateEntityName(entity->getEntityItemID()));
-            if (_enableUpdate)
-                emit updateSceneModel(entity->getEntityItemID(), EditElementAction);
+            if (_enableUpdate) {
+                if (nameChanged)
+                    emit updateSceneModel(entity->getEntityItemID(), NameChangedAction);
+                else
+                    emit updateSceneModel(entity->getEntityItemID(), ParentChangedAction);
         }
 
         QString entityScriptBefore = entity->getScript();

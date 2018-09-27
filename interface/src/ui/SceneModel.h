@@ -38,7 +38,7 @@ private:
     EntityTreePointer _treePointer = { nullptr };
 
     QHash<int, QByteArray> m_roleNameMapping;
-    QHash<QUuid, SceneNode*> _nodeMap;
+    QHash<QUuid, SceneNode*> m_nodeMap;
 
 };
 

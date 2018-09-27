@@ -304,12 +304,17 @@ void EntityItemProperties::setMaterialMappingModeFromString(const QString& mater
     }
 }
 
-// need to update name when user specified a new one or we reparent the entity
-bool EntityItemProperties::needToUpdateModel() const {
+bool EntityItemProperties::hasNameChanged() const
+{
     EntityPropertyFlags changedProperties;
     CHECK_PROPERTY_CHANGE(PROP_NAME, name);
+    return changedProperties.getHasProperty(PROP_NAME);
+}
+bool EntityItemProperties::hasParentChanged() const
+{
+    EntityPropertyFlags changedProperties;
     CHECK_PROPERTY_CHANGE(PROP_PARENT_ID, parentID);
-    return changedProperties.getHasProperty(PROP_NAME) || changedProperties.getHasProperty(PROP_PARENT_ID);
+    return changedProperties.getHasProperty(PROP_PARENT_ID);
 }
 
 EntityPropertyFlags EntityItemProperties::getChangedProperties() const {

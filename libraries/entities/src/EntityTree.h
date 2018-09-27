@@ -59,9 +59,10 @@ public:
     enum SceneAction
     {
         InitializeAction,
-        AddElementAction,
-        EditElementAction,
-        DeleteElementAction,
+        EntityAddedAction,
+        NameChangedAction,
+        ParentChangedAction,
+        EntityDeletedAction,
     };
     Q_ENUM(SceneAction)
 
