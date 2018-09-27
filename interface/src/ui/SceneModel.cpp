@@ -271,14 +271,21 @@ void SceneModel::setupModelData(QUuid entityID, int action) {
                 targetIndex = createIndex(targetParent->row(), 0, targetParent);
             // we are releasing the manipulator - do nothing
             if (sourceIndex != targetIndex) {
-                beginMoveRows(sourceIndex, startRow, startRow, targetIndex, targetParent->childCount());
+                //beginMoveRows(sourceIndex, startRow, startRow, targetIndex, targetParent->childCount());
+                beginRemoveRows(sourceIndex, startRow, startRow);
 
                 // remove this item from its parent
                 sourceParent->removeChild(reparentedNode);
+
+                endRemoveRows();
+
+                auto insertRow = targetParent->childCount();
+                beginInsertRows(targetIndex, insertRow, insertRow);
                 // reparent it
                 targetParent->appendChild(reparentedNode);
 
-                endMoveRows();
+                //endMoveRows();
+                endInsertRows();
             }
 
         }
@@ -304,7 +311,3 @@ void SceneModel::refresh(QUuid entityId, int action) {
     setupModelData(entityId, action);
 }
 
-int SceneModel::getRoleKey(const QString& rolename) const
-{
-    return roleNames().key(rolename.toLatin1());
-}

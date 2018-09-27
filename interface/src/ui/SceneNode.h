@@ -6,16 +6,11 @@
 #include <QList>
 #include <QVariant>
 
-//! [0]
 class SceneNode : public QObject
 {
     Q_OBJECT
 
 public:
-
-    //Q_PROPERTY(QString name READ name WRITE setName NOTIFY nameChanged)
-    //Q_PROPERTY(QString id READ id WRITE setId NOTIFY idChanged)
-    //Q_PROPERTY(bool collapsed READ collapsed WRITE setCollapsed NOTIFY collapsedChanged)
 
     explicit SceneNode(const QList<QVariant>& data, SceneNode* parent);
     ~SceneNode();
@@ -42,7 +37,6 @@ private:
     QList<QVariant> m_itemData;
     SceneNode* m_parentItem = nullptr;
 };
-//! [0]
 
 #endif  // SCENENODE_H
 

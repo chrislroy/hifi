@@ -41,7 +41,6 @@ TabBar {
         }
     }
 
-
     EditTabButton {
         title: "GRAPH"
         active: true
@@ -85,17 +84,7 @@ TabBar {
                             headerVisible: false
                             itemDelegate: TreeDelegate {}
                             selectionMode: SelectionMode.SingleSelection
-                            /*
-                            onCollapsed: {
-                                console.log("collapsed ", sceneModel.get(index).name);
-                                sceneModel.get(index).collapsed = true;
-                            }
 
-                            onExpanded: {
-                                console.log("expanded ", sceneModel.get(index).name);
-                                sceneModel.get(index).collapsed = false;
-                            }
-                            */
                             TableViewColumn {
                                 title: "Name"
                                 role: "name"
@@ -109,46 +98,6 @@ TabBar {
 
     } // EditTabButton
 
-
-    /*
-    function fromScript(message) {
-
-        console.log('editEntityList.fromScript');
-        switch (message.method) {
-            case 'selectTab':
-                selectTab(message.params.id);
-                break;
-            default:
-                console.warn('Unrecognized message:', JSON.stringify(message));
-        }
-    }
-    */
-    // Changes the current tab based on tab index or title as input
-    /*
-    function selectTab(id) {
-        console.log('editEntityList.selectTab');
-        if (typeof id === 'number') {
-            if (id >= tabIndex.create && id <= tabIndex.particle) {
-                sceneTabViews.currentIndex = id;
-            } else {
-                console.warn('Attempt to switch to invalid tab:', id);
-            }
-        } else if (typeof id === 'string'){
-            switch (id.toLowerCase()) {
-                case 'list':
-                    sceneTabViews.currentIndex = tabIndex.list;
-                    break;
-                case 'graph':
-                    sceneTabViews.currentIndex = tabIndex.graph;
-                    break;
-                default:
-                    console.warn('Attempt to switch to invalid tab:', id);
-            }
-        } else {
-            console.warn('Attempt to switch tabs with invalid input:', JSON.stringify(id));
-        }
-    }
-    */
 }
 
 
