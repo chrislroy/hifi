@@ -659,7 +659,7 @@ void EntityTree::deleteEntity(const EntityItemID& entityID, bool force, bool ign
     emit deletingEntity(entityID);
     emit deletingEntityPointer(existingEntity.get());
     if (_enableUpdate)
-        emit updateSceneModel(entityID, DeleteElementAction);
+        emit updateSceneModel(entityID, EntityDeletedAction);
 
     // NOTE: callers must lock the tree before using this method
     DeleteEntityOperator theOperator(getThisPointer(), entityID);
