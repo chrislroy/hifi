@@ -2,7 +2,7 @@ import QtQuick 2.0
 
 Rectangle {
     id: item
-    color: "#404040"
+    color: styleData.row % 2 == 0 ? hifi.colors.tableRowDarkEven : hifi.colors.tableRowDarkOdd;
 
     Component.onCompleted : { 
         console.log("TreeDelegate in completed:", model.id)
@@ -17,7 +17,7 @@ Rectangle {
 
         font.family: "Fira Sans SemiBold"
         font.pixelSize: hifi.fontSizes.textFieldInput
-        height: hifi.dimensions.tableRowHeight
+        verticalAlignment: Text.AlignVCenter
     }
 
     DropArea {

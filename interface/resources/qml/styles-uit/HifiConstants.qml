@@ -122,6 +122,7 @@ QtObject {
         readonly property color textFieldLightBackground: "#d4d4d4"
         readonly property color tabBackgroundDark: "#252525"
         readonly property color tabBackgroundLight: "#d4d4d4"
+
     }
 
     readonly property QtObject colorSchemes: QtObject {
@@ -154,6 +155,7 @@ QtObject {
         readonly property real scrollbarHandleWidth: scrollbarBackgroundWidth - 2
         readonly property real tabletMenuHeader: 90
         readonly property real buttonWidth: 120
+        readonly property real treeviewRowHeight: largeScreen ? 26 : 23
     }
 
     readonly property QtObject fontSizes: QtObject {

@@ -50,7 +50,7 @@ TabBar {
         property Component visualItem: Component {
 
             Rectangle {
-                color: "#404040"
+                
                 id: container
 
                 Flickable {
@@ -79,7 +79,7 @@ TabBar {
                             id: treeView
                             anchors.fill: parent
                             model: sceneModel
-                            alternatingRowColors: false
+                            alternatingRowColors: true
                             backgroundVisible: false
                             headerVisible: false
                             itemDelegate: TreeDelegate {}
@@ -88,7 +88,12 @@ TabBar {
                             TableViewColumn {
                                 title: "Name"
                                 role: "name"
-                            }
+                            } // TableViewColumn
+
+                            rowDelegate: Rectangle {
+                                height: hifi.dimensions.tableRowHeight
+                                color: styleData.row % 2 == 0 ? hifi.colors.tableRowDarkEven : hifi.colors.tableRowDarkOdd;
+                            } // Rectangle
 
                         } // TreeView
                     } // MouseArea
