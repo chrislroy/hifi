@@ -60,8 +60,9 @@ bool SceneModel::setData(const QModelIndex &index, const QVariant &value, int ro
     // TODO - TO TEST
     if (!index.isValid())
         return false;
-    if (role != NodeRoleName && role != NodeRoleID)
+    if (role != NodeRoleName && role != NodeRoleID )
         return false;
+
     SceneNode* item = static_cast<SceneNode*>(index.internalPointer());
     item->updateData(role - Qt::UserRole - 1, value);
     QVector<int> roleChanged = { role };
