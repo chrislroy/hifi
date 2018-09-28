@@ -2826,7 +2826,7 @@ QString EntityTree::generateEntityName(const EntityItemID& entityID) const {
         QHash<EntityItemID, EntityItemPointer>::const_iterator itr;
         for (itr = _entityMap.constBegin(); itr != _entityMap.constEnd(); ++itr) {
             const EntityItemPointer& entityItem = itr.value();
-            if (entityItem->getID() != entity->getID())
+            if (entityItem->getParentID().isNull() && entityItem->getID() != entity->getID() )
                 childrenNames.append(entityItem->getName());
         }
     } else if (_entityMap.contains(parentId)) {
